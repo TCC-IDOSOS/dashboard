@@ -1,0 +1,43 @@
+name: Build and Push Docker Image
+
+# Quando esse script vai rodar? Toda vez que houver push na branch main
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    
+    # Dá permissão para o GitHub Actions gravar no Container Registry
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      # 1. Baixa o seu código do repositório
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      # 2. Faz login no GitHub Container Registry usando o token automático
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 3. Transforma o nome do dono/repositório em minúsculas (exigência do Docker)
+      - name: Set lower case owner name
+        run: |
+          echo "REPO_LC=${GITHUB_REPOSITORY,,}" >> ${GITHUB_ENV}
+
+      # 4. Faz o Build e envia (Push) a imagem do Docker
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          # Nomeia a imagem como: ghcr.io/seu-usuario/dashboard:latest
+          tags: ghcr.io/${{ env.REPO_LC }}:latest
