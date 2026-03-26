@@ -17,27 +17,32 @@
           <div class="space-y-4">
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Nome Completo</label>
-              <input type="text" formControlName="nomeCompleto" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
+              <input type="text" formControlName="name" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
             </div>
   
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Data de Nascimento</label>
-              <input type="date" formControlName="dataNascimento" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
+              <input type="date" formControlName="birthDate" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
             </div>
   
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">CEP</label>
-              <input type="text" formControlName="cep" placeholder="00000-000" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
+              <input type="text" formControlName="zipCode" placeholder="00000-000" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
             </div>
   
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Rua</label>
-              <input type="text" formControlName="rua" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-200 text-gray-500 border p-2 cursor-not-allowed">
+              <input type="text" formControlName="streetName" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-200 text-gray-500 border p-2 cursor-not-allowed">
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
+              <input type="text" formControlName="bairro" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-200 text-gray-500 border p-2 cursor-not-allowed">
             </div>
   
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Cidade</label>
-              <input type="text" formControlName="cidade" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-200 text-gray-500 border p-2 cursor-not-allowed">
+              <input type="text" formControlName="city" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-200 text-gray-500 border p-2 cursor-not-allowed">
             </div>
   
             <div>
@@ -55,6 +60,15 @@
           </div>
   
           <div class="space-y-4">
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Gênero</label>
+              <select formControlName="genre" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
+                <option value="" disabled selected>Selecione um gênero</option>
+                <option *ngFor="let genre of genres" [value]="genre">{{ genre }}</option>
+              </select>
+            </div>
+
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">E-mail</label>
               <input type="email" formControlName="email" placeholder="@exemplo.com" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
@@ -68,22 +82,27 @@
             <div class="grid grid-cols-2 gap-4">
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Número</label>
-                <input type="text" formControlName="numero" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
+                <input type="text" formControlName="streetNumber" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
               </div>
               <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Bairro</label>
                 <input type="text" formControlName="bairro" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
               </div>
             </div>
+
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Complemento</label>
+              <input type="text" formControlName="complement" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
+            </div>
   
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">UF</label>
-              <input type="text" formControlName="uf" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-200 text-gray-500 border p-2 cursor-not-allowed">
+              <input type="text" formControlName="state" class="w-full border-gray-300 rounded-md shadow-sm bg-gray-200 text-gray-500 border p-2 cursor-not-allowed">
             </div>
   
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Usuário</label>
-              <select formControlName="tipoUsuario" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
+              <select formControlName="profile" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
                 <option value="" disabled selected>Selecione um tipo...</option>
                 <option *ngFor="let tipo of tiposUsuario" [value]="tipo">{{ tipo }}</option>
               </select>
@@ -91,7 +110,7 @@
   
             <div>
               <label class="block text-sm font-medium text-gray-700 mb-1">Nova senha</label>
-              <input type="password" formControlName="senha" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
+              <input type="password" formControlName="password" class="w-full border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 bg-gray-50 border p-2">
             </div>
           </div>
         </div>

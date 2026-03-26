@@ -22,57 +22,37 @@ export default class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.buildForm();
     this.setupCepListener();
-    this.carregarDadosUsuario();
   }
 
   buildForm(): void {
     this.profileForm = this.fb.group({
-      nomeCompleto: ['', Validators.required],
+      name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]], 
-      dataNascimento: ['', [Validators.required, this.pastDateValidator]], 
+      birthDate: ['', [Validators.required, this.pastDateValidator]], 
       cpf: ['', [Validators.required, this.cpfValidator]], 
-      cep: ['', Validators.required],
-      rua: [{ value: '', disabled: true }], 
-      numero: ['', Validators.required],
+      zipCode: ['', Validators.required],
+      streetName: [{ value: '', disabled: true }], 
+      streetNumber: ['', Validators.required],
       bairro: ['', Validators.required],
-      cidade: [{ value: '', disabled: true }], 
-      uf: [{ value: '', disabled: true }], 
+      city: [{ value: '', disabled: true }], 
+      state: [{ value: '', disabled: true }], 
       unidadeSaude: ['', Validators.required],
-      senha: ['', Validators.required]
+      password: ['', Validators.required]
     });
   }
 
-  carregarDadosUsuario(): void {
-    const dadosBanco = {
-      nomeCompleto: 'Alan Silva',
-      email: 'alan@exemplo.com',
-      dataNascimento: '1990-05-15',
-      cpf: '123.456.789-00',
-      cep: '01001-000',
-      rua: 'Praça da Sé',
-      numero: '123',
-      bairro: 'Sé',
-      cidade: 'São Paulo',
-      uf: 'SP',
-      unidadeSaude: 'Unidade Central',
-      senha: '' 
-    };
-
-    this.profileForm.patchValue(dadosBanco);
-  }
-
   setupCepListener(): void {
-    this.profileForm.get('cep')?.valueChanges.subscribe(cep => {
+    this.profileForm.get('zipCode')?.valueChanges.subscribe(cep => {
       if (!cep) return;
       const cleanCep = cep.replace(/\D/g, '');
       if (cleanCep.length === 8) {
         this.http.get<any>(`https://viacep.com.br/ws/${cleanCep}/json/`).subscribe(data => {
           if (!data.erro) {
             this.profileForm.patchValue({
-              rua: data.logradouro,
+              streetName: data.logradouro,
               bairro: data.bairro,
-              cidade: data.localidade,
-              uf: data.uf
+              city: data.localidade,
+              state: data.uf
             });
           }
         });
@@ -107,7 +87,7 @@ export default class ProfileComponent implements OnInit {
       return;
     }
 
-    if (controls['dataNascimento'].errors?.['futureDate']) {
+    if (controls['birthDate'].errors?.['futureDate']) {
       this.formErrorMessage.set('Data de nascimento superior a data atual');
       return;
     }

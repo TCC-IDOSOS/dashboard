@@ -1,7 +1,11 @@
-import { Component, OnInit, inject, output } from '@angular/core';
+import { Component, OnInit, inject, output, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
+import { Genero, PerfilUsuario, Usuario } from '../../shared/interfaces/usuario.interface';
+import { UsuariosService } from '../../services/usuarios';
+import { Operacao } from '../../shared/interfaces/operacao.enum';
+import { ThisReceiver } from '@angular/compiler';
 
 @Component({
   selector: 'app-user-modal',
@@ -13,8 +17,11 @@ import { HttpClient } from '@angular/common/http';
 export class UserModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
+  private userService = inject(UsuariosService)
 
   fechar = output<void>();
+  usuario = input<Usuario | null>(null);
+  criarEditarUsuario = input<Operacao.CRIAR_USUARIO | Operacao.EDITAR_USUARIO>(Operacao.CRIAR_USUARIO)
 
   userForm!: FormGroup;
   formErrorMessage: string | null = null;
@@ -22,43 +29,71 @@ export class UserModalComponent implements OnInit {
   // mocks para teste
   //TODO: REMOVER
   unidadesSaude = ['Unidade Central', 'Posto Norte', 'Clínica Sul', 'Hospital Leste'];
-  tiposUsuario = ['Paciente', 'Profissional da Saúde'];
+  tiposUsuario = ['Paciente', 'Profissional da Saúde', "Admin"];
+  genres = [Genero.MASCULINO, Genero.FEMININO, Genero.PREFIRO_NAO_INFORMAR, Genero.OUTRO]
+  usuarioSalvo = output<void>();
 
   ngOnInit(): void {
+    const user = this.usuario(); 
+
     this.buildForm();
     this.setupCepListener();
+    if (user) {
+      this.userForm.patchValue({
+        name: user.name,
+        email: user.email,
+        birthDate: user.birthDate.toString().split('T')[0],
+        cpf: user.cpf,
+        zipCode: user.address.zipCode,
+        streetName: user.address.streetName,
+        streetNumber: user.address.streetNumber,
+        bairro: user.address.bairro,
+        city: user.address.city,
+        state: user.address.state,
+        complement: user.address.complement,
+        id: '',
+        genre: user.genre,
+        profile: user.profile,
+        telefone: user.telefone,
+        ativo: "sim",
+        password: user.password,
+        unidadeSaude: user.unidadeSaude
+      });
+    }
   }
 
   buildForm(): void {
     this.userForm = this.fb.group({
-      nomeCompleto: ['', Validators.required],
+      name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
-      dataNascimento: ['', [Validators.required, this.pastDateValidator]],
+      birthDate: ['', [Validators.required, this.pastDateValidator]],
       cpf: ['', [Validators.required, this.cpfValidator]],
-      cep: ['', Validators.required],
-      rua: [{ value: '', disabled: true }],
-      numero: ['', Validators.required],
+      zipCode: ['', Validators.required],
+      streetName: [{ value: '', disabled: true }],
+      streetNumber: ['', Validators.required],
       bairro: ['', Validators.required],
-      cidade: [{ value: '', disabled: true }],
-      uf: [{ value: '', disabled: true }],
+      complement: [''],
+      city: [{ value: '', disabled: true }],
+      state: [{ value: '', disabled: true }],
       quantidadeQuedas: [0, Validators.required],
       unidadeSaude: ['', Validators.required],
-      tipoUsuario: ['', Validators.required],
-      senha: ['', [Validators.required, this.passwordValidator]]
+      genre: ['', Validators.required],
+      profile: ['', Validators.required],
+      password: ['', [Validators.required, this.passwordValidator]]
     });
   }
 
   setupCepListener(): void {
-    this.userForm.get('cep')?.valueChanges.subscribe(cep => {
+    this.userForm.get('zipCode')?.valueChanges.subscribe(cep => {
       const cleanCep = cep.replace(/\D/g, '');
       if (cleanCep.length === 8) {
         this.http.get<any>(`https://viacep.com.br/ws/${cleanCep}/json/`).subscribe(data => {
           if (!data.erro) {
             this.userForm.patchValue({
-              rua: data.logradouro,
+              streetName: data.logradouro,
               bairro: data.bairro,
-              cidade: data.localidade,
-              uf: data.uf
+              city: data.localidade,
+              state: data.uf
             });
           }
         });
@@ -74,10 +109,48 @@ export class UserModalComponent implements OnInit {
     }
 
     const userData = this.userForm.getRawValue();
-    console.log('Usuário salvo com sucesso!', userData);
-    alert('Usuário cadastrado com sucesso!');
-    
-    this.fechar.emit();
+
+    const payload: Usuario = {
+      name: userData.name,
+      email: userData.email,
+      birthDate: userData.birthDate,
+      cpf: userData.cpf,
+      address: {
+        zipCode: userData.zipCode,
+        streetName: userData.streetName,
+        streetNumber: userData.streetNumber,
+        bairro: userData.bairro,
+        city: userData.city,
+        state: userData.state,
+        complement: userData.complement
+      },
+      id: this.criarEditarUsuario() ===  Operacao.EDITAR_USUARIO ? userData.id : this.userService.idUsuario,
+      genre: userData.genre,
+      profile: userData.profile,
+      telefone: userData.telefone,
+      ativo: "sim",
+      password: userData.password,
+      unidadeSaude: userData.unidadeSaude
+    }
+
+    if(this.criarEditarUsuario() === Operacao.CRIAR_USUARIO) {
+      this.userService.cadastrarUsuario(payload).subscribe({
+        next: (res) => {
+          alert('Usuário cadastrado com sucesso!');
+          this.fechar.emit();
+          this.usuarioSalvo.emit();
+        }
+      })
+    } else {
+      console.warn(this.usuario()?.id)
+      this.userService.atualizarUsuario(this.usuario()!.id, payload).subscribe({
+        next: (res) => {
+          alert('Usuario editado com sucesso!');
+          this.fechar.emit();
+          this.usuarioSalvo.emit();
+        }
+      })
+    }
   }
 
   cancelar(): void {
@@ -98,7 +171,7 @@ export class UserModalComponent implements OnInit {
       return;
     }
 
-    if (controls['dataNascimento'].errors?.['futureDate']) {
+    if (controls['birthDate'].errors?.['futureDate']) {
       this.formErrorMessage = 'Data de nascimento superior a data atual';
       return;
     }
@@ -108,7 +181,7 @@ export class UserModalComponent implements OnInit {
       return;
     }
 
-    if (controls['senha'].errors?.['weakPassword']) {
+    if (controls['password'].errors?.['weakPassword']) {
       this.formErrorMessage = 'Favor preencher uma senha que contenha mínimo 8 dígitos, contendo ao menos 1 letra maiúscula, 1 letra minúscula e 1 número';
       return;
     }

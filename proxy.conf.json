@@ -1,0 +1,12 @@
+{
+  "/user": {
+    "target": "http://18.191.134.108:8080",
+    "secure": false,
+    "changeOrigin": true
+  },
+  "/users": {
+    "target": "http://18.191.134.108:8080",
+    "secure": false,
+    "changeOrigin": true
+  }
+}
