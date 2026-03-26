@@ -5,6 +5,7 @@
     "ng": "ng",
     "start": "ng serve",
     "build": "ng build",
+    "start:mock": "concurrently \"ng serve\" \"node mock/server.js\"",
     "watch": "ng build --watch --configuration development",
     "test": "ng test"
   },
@@ -19,6 +20,8 @@
     "@angular/platform-browser-dynamic": "^21.2.3",
     "@angular/router": "^21.2.3",
     "bootstrap": "^5.3.8",
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"
@@ -31,6 +34,7 @@
     "@tailwindcss/cli": "^4.2.2",
     "@types/jest": "^30.0.0",
     "autoprefixer": "^10.4.27",
+    "concurrently": "^9.2.1",
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "jest-preset-angular": "^16.1.1",

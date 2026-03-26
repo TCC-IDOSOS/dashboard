@@ -34,57 +34,58 @@
         </thead>
         <tbody class="divide-y divide-gray-100 text-sm">
 
-          <tr *ngFor="let u of usuariosFiltrados()" class="hover:bg-gray-50 transition-colors">
-            <td class="py-4 px-6">
-              <div class="font-medium text-gray-900">{{ u.nome }}</div>
-              <div class="text-gray-400 text-xs mt-0.5" *ngIf="u.tipo === 'Paciente'">{{ u.quedas }} quedas registradas
-              </div>
-            </td>
-            <td class="py-4 px-6 text-gray-700">{{ u.cpf }}</td>
-            <td class="py-4 px-6">
-              <span class="px-2.5 py-1 text-xs font-medium rounded-full"
-                [ngClass]="{'bg-blue-50 text-blue-700': u.tipo === 'Paciente', 'bg-green-50 text-green-700': u.tipo === 'Profissional'}">
-                {{ u.tipo }}
-              </span>
-            </td>
-            <td class="py-4 px-6 text-gray-600">{{ u.email }}</td>
-
-            <td class="py-4 px-6 text-right space-x-3">
-
-              <button (click)="editarUsuario(u)"
-                class="inline-flex items-center justify-center p-1 text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
-                title="Editar">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
-                  </path>
-                </svg>
-              </button>
-
-              <button *ngIf="u.tipo === 'Paciente'" (click)="visualizarTestes(u)"
-                class="inline-flex items-center justify-center p-1 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
-                title="Ver Testes">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
-                  </path>
-                </svg>
-              </button>
-
-              <button (click)="excluirUsuario(u)"
-                class="inline-flex items-center justify-center p-1 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
-                title="Excluir">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
-                  </path>
-                </svg>
-              </button>
-
-            </td>
-          </tr>
+          @for(u of usuariosFiltrados(); track $index) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="py-4 px-6">
+                <div class="font-medium text-gray-900">{{ u.name }}</div>
+              </td>
+              <td class="py-4 px-6 text-gray-700">{{ u.cpf }}</td>
+              <td class="py-4 px-6">
+                <span class="px-2.5 py-1 text-xs font-medium rounded-full"
+                  [ngClass]="{'bg-blue-50 text-blue-700': u.profile === 'Paciente', 'bg-green-50 text-green-700': u.profile === 'Profissional'}">
+                  {{ u.profile }}
+                </span>
+              </td>
+              <td class="py-4 px-6 text-gray-600">{{ u.email }}</td>
+  
+              <td class="py-4 px-6 text-right space-x-3">
+  
+                <button (click)="editarUsuario(u)"
+                  class="inline-flex items-center justify-center p-1 text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
+                  title="Editar">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z">
+                    </path>
+                  </svg>
+                </button>
+  
+                <button *ngIf="u.profile === 'Paciente'" (click)="visualizarTestes(u)"
+                  class="inline-flex items-center justify-center p-1 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                  title="Ver Testes">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z">
+                    </path>
+                  </svg>
+                </button>
+  
+                <button (click)="excluirUsuario(u)"
+                  class="inline-flex items-center justify-center p-1 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
+                  title="Excluir">
+                  <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                  </svg>
+                </button>
+  
+              </td>
+            </tr>
+          }
+          
 
           <tr *ngIf="usuariosFiltrados().length === 0">
             <td colspan="5" class="py-8 text-center text-gray-500">
@@ -99,6 +100,11 @@
   </main>
 
   @if (modalAberto()) {
-    <app-user-modal (fechar)="fecharModal()"></app-user-modal>
+    <app-user-modal 
+      (fechar)="fecharModal()"
+      [usuario]="usuarioSelecionado()"
+      [criarEditarUsuario]="criarEditarUsuario()"
+      (usuarioSalvo)="carregarUsuarios()">
+    </app-user-modal>
   }
 </div>

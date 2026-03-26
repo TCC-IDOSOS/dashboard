@@ -1,19 +1,12 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { UserModalComponent } from '../../components/user-modal/user-modal';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
-
-// Interface baseada nos dados do wireframe
-export interface Usuario {
-  id: number;
-  nome: string;
-  quedas: number;
-  cpf: string;
-  tipo: 'Paciente' | 'Profissional';
-  email: string;
-}
+import { UsuariosService } from '../../services/usuarios';
+import { Paciente, Usuario } from '../../shared/interfaces/usuario.interface';
+import { Operacao } from '../../shared/interfaces/operacao.enum';
 
 @Component({
   selector: 'app-user-list',
@@ -21,28 +14,38 @@ export interface Usuario {
   imports: [CommonModule, FormsModule, UserModalComponent, MenuLateral ],
   templateUrl: './user-list.html'
 })
-export default class UserListComponent {
-
-  usuarios = signal<Usuario[]>([
-    { id: 1, nome: 'Maria Silva', quedas: 2, cpf: '109.443.124-00', tipo: 'Paciente', email: 'cristhian.jdhs@gmail.com' },
-    { id: 2, nome: 'DR. Jose da Silva', quedas: 0, cpf: '109.443.124-00', tipo: 'Profissional', email: 'cristhian.jdhs@gmail.com' },
-    { id: 3, nome: 'Maria Silva', quedas: 2, cpf: '109.443.124-00', tipo: 'Paciente', email: 'cristhian.jdhs@gmail.com' },
-  ]);
+export default class UserListComponent implements OnInit{
 
   termoPesquisa = signal('');
   modalAberto = signal(false);
 
-  usuariosFiltrados = computed(() => {
-    const termo = this.termoPesquisa().toLowerCase();
-    return this.usuarios().filter(u => 
-      u.nome.toLowerCase().includes(termo) ||
-      u.cpf.includes(termo) ||
-      u.email.toLowerCase().includes(termo)
-    );
-  });
+  criarEditarUsuario = signal<Operacao.CRIAR_USUARIO | Operacao.EDITAR_USUARIO>(Operacao.CRIAR_USUARIO)
+
+  usuarios = signal<Usuario[]>([]);
+  usuarioSelecionado = signal<Usuario | null>(null);
+
+  usuarioService = inject(UsuariosService);
+
+  ngOnInit(): void {
+    this.carregarUsuarios();
+  }
+
+  carregarUsuarios() {
+    this.usuarioService.listarPacientes().subscribe({
+      next: (dadosRetornados) => {
+        this.usuarios.set(dadosRetornados); 
+      },
+      error: (erro) => {
+        console.error("Falha ao buscar os usuários: ", erro);
+      }
+    })
+  }
+
 
   novoUsuario() {
+    this.usuarioSelecionado.set(null);
     this.modalAberto.set(true);
+    this.criarEditarUsuario.set(Operacao.CRIAR_USUARIO);
   }
 
   fecharModal() {
@@ -50,6 +53,9 @@ export default class UserListComponent {
   }
 
   editarUsuario(usuario: Usuario) {
+    this.modalAberto.set(true);
+    this.usuarioSelecionado.set(usuario);
+    this.criarEditarUsuario.set(Operacao.EDITAR_USUARIO);
     console.log('Abrindo tela "Manter Usuário" com os dados:', usuario);
   }
 
@@ -58,9 +64,15 @@ export default class UserListComponent {
   }
 
   excluirUsuario(usuario: Usuario) {
-    if (confirm(`Tem certeza que deseja excluir o usuário ${usuario.nome}?`)) {
-      this.usuarios.update(lista => lista.filter(u => u.id !== usuario.id));
-      console.log('Usuário excluído com sucesso.');
-    }
+    console.log('Exlcuir usuario');
   }
+
+  usuariosFiltrados = computed(() => {
+    const termo = this.termoPesquisa().toLowerCase();
+    return this.usuarios().filter(u => 
+      u.name.toLowerCase().includes(termo) ||
+      u.cpf.includes(termo)
+    );
+  });
+
 }
