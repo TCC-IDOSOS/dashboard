@@ -1,7 +1,11 @@
 export interface UnidadeSaude {
-    id: number
-    nome: string
-    cnpj: string
-    telefone: string
-    email: string
-}
+    id?: string | number;
+    nome: string;
+    rua: string;
+    numero: string;
+    cep: string;
+    bairro: string;
+    cidade: string;
+    uf: string;
+    cnpj: string;
+  }
