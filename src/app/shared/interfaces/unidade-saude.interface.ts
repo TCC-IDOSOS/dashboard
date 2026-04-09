@@ -1,11 +1,10 @@
+import { Endereco } from "./endereco.interface";
+
 export interface UnidadeSaude {
-    id?: string | number;
-    nome: string;
-    rua: string;
-    numero: string;
-    cep: string;
-    bairro: string;
-    cidade: string;
-    uf: string;
+    id: number;
+    name: string;
     cnpj: string;
-  }
+    phone: string;
+    email: string;
+    address: Endereco;
+}

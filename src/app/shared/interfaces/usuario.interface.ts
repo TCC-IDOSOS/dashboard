@@ -1,5 +1,4 @@
 import { Endereco } from "./endereco.interface"
-import { Login } from "./login.interface"
 import { Teste } from "./teste.interface"
 import { UnidadeSaude } from "./unidade-saude.interface"
 

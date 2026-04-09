@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { Genero, PerfilUsuario, Usuario } from '../../shared/interfaces/usuario.interface';
-import { UsuariosService } from '../../services/usuarios';
+import { UsuariosService } from '../../services/usuarios/usuarios';
 import { Operacao } from '../../shared/interfaces/operacao.enum';
 import { ThisReceiver } from '@angular/compiler';
 
@@ -21,7 +21,7 @@ export class UserModalComponent implements OnInit {
 
   fechar = output<void>();
   usuario = input<Usuario | null>(null);
-  criarEditarUsuario = input<Operacao.CRIAR_USUARIO | Operacao.EDITAR_USUARIO>(Operacao.CRIAR_USUARIO)
+  criarEditarUsuario = input<Operacao.CRIAR | Operacao.EDITAR>(Operacao.CRIAR)
 
   userForm!: FormGroup;
   formErrorMessage: string | null = null;
@@ -29,7 +29,7 @@ export class UserModalComponent implements OnInit {
   // mocks para teste
   //TODO: REMOVER
   unidadesSaude = ['Unidade Central', 'Posto Norte', 'Clínica Sul', 'Hospital Leste'];
-  tiposUsuario = ['Paciente', 'Profissional da Saúde', "Admin"];
+  tiposUsuario = ['Paciente', 'Profissional', "Admin"];
   genres = [Genero.MASCULINO, Genero.FEMININO, Genero.PREFIRO_NAO_INFORMAR, Genero.OUTRO]
   usuarioSalvo = output<void>();
 
@@ -124,7 +124,7 @@ export class UserModalComponent implements OnInit {
         state: userData.state,
         complement: userData.complement
       },
-      id: this.criarEditarUsuario() ===  Operacao.EDITAR_USUARIO ? userData.id : this.userService.idUsuario,
+      id: this.criarEditarUsuario() ===  Operacao.EDITAR ? userData.id : this.userService.idUsuario,
       genre: userData.genre,
       profile: userData.profile,
       telefone: userData.telefone,
@@ -133,7 +133,7 @@ export class UserModalComponent implements OnInit {
       unidadeSaude: userData.unidadeSaude
     }
 
-    if(this.criarEditarUsuario() === Operacao.CRIAR_USUARIO) {
+    if(this.criarEditarUsuario() === Operacao.CRIAR) {
       this.userService.cadastrarUsuario(payload).subscribe({
         next: (res) => {
           alert('Usuário cadastrado com sucesso!');
@@ -142,7 +142,6 @@ export class UserModalComponent implements OnInit {
         }
       })
     } else {
-      console.warn(this.usuario()?.id)
       this.userService.atualizarUsuario(this.usuario()!.id, payload).subscribe({
         next: (res) => {
           alert('Usuario editado com sucesso!');

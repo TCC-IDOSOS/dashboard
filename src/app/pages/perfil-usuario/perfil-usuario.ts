@@ -3,6 +3,9 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, AbstractControl, ValidationErrors } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
+import { LoginService } from '../../services/login/login';
+import { Router } from '@angular/router';
+import { UsuariosService } from '../../services/usuarios/usuarios';
 
 @Component({
   selector: 'app-profile',
@@ -13,6 +16,9 @@ import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
 export default class ProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
+  private loginService = inject(LoginService);
+  private router = inject(Router);
+  private usuariosService = inject(UsuariosService);
 
   profileForm!: FormGroup;
   formErrorMessage = signal<string | null>(null);
@@ -22,6 +28,30 @@ export default class ProfileComponent implements OnInit {
   ngOnInit(): void {
     this.buildForm();
     this.setupCepListener();
+
+    const idUsuario = this.loginService.getIdUsuarioLogado();
+    
+    if (idUsuario) {
+      this.usuariosService.buscarUsuarioPorId(idUsuario).subscribe({
+        next: (user) => {
+          this.profileForm.patchValue({
+            name: user.name,
+            email: user.email,
+            birthDate: user.birthDate ? user.birthDate.toString().split('T')[0] : '',
+            cpf: user.cpf,
+            zipCode: user.address?.zipCode,
+            streetName: user.address?.streetName,
+            streetNumber: user.address?.streetNumber,
+            bairro: user.address?.bairro,
+            city: user.address?.city,
+            state: user.address?.state,
+            unidadeSaude: user.unidadeSaude,
+            password: user.password
+          });
+        },
+        error: (erro) => console.error('Erro ao buscar informações do usuário logado', erro)
+      });
+    }
   }
 
   buildForm(): void {
@@ -71,6 +101,12 @@ export default class ProfileComponent implements OnInit {
     const formData = this.profileForm.getRawValue();
     console.log('Salvando no banco de dados...', formData);
     alert('Alterações salvas com sucesso!');
+  }
+
+  logout(): void {
+    this.loginService.removerToken();
+    sessionStorage.removeItem('ID_USUARIO');
+    this.router.navigate(['/login']);
   }
 
   private handleValidationErrors(): void {

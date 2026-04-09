@@ -1,5 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ILogin } from '../../shared/interfaces/login.interface';
+import { LoginService } from '../../services/login/login';
+import { Router } from '@angular/router';
+
 
 @Component({
   selector: 'app-login',
@@ -9,6 +13,8 @@ import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angula
 })
 export default class Login {
   private fb = inject(NonNullableFormBuilder);
+  private loginService = inject(LoginService)
+  private router = inject(Router);
 
   isLoading = signal(false);
   errorMessage = signal<string | null>(null);
@@ -27,8 +33,18 @@ export default class Login {
     this.isLoading.set(true);
     this.errorMessage.set(null);
 
-    const payload = this.loginForm.getRawValue();
-    console.log('Dados prontos para o Backend:', payload);
+    const login: ILogin = {
+      email: this.loginForm.getRawValue().email,
+      password: this.loginForm.getRawValue().password
+    }
+
+    this.loginService.login(login).subscribe({
+      next: (res) => {
+        this.loginService.salvarToken(res.token);
+        this.loginService.setIdUsuarioLogado(Number(res.userId));
+        this.router.navigate(['/usuarios']);
+      }
+    })
 
     setTimeout(() => {
       this.isLoading.set(false);
