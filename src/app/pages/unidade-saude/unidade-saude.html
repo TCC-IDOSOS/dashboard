@@ -23,10 +23,10 @@
           <div class="border border-gray-200 rounded-xl p-5 flex justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow">
             
             <div>
-              <h3 class="text-lg font-bold text-gray-900 mb-1">{{ unidade.nome }}</h3>
+              <h3 class="text-lg font-bold text-gray-900 mb-1">{{ unidade.name }}</h3>
               <p class="text-gray-600 text-sm leading-relaxed">
-                {{ unidade.rua }}, {{ unidade.numero }} - {{ unidade.bairro }}<br>
-                {{ unidade.cidade }} - {{ unidade.uf }}, CEP: {{ unidade.cep }}<br>
+                {{ unidade.address.streetName }}, {{ unidade.address.streetNumber }} - {{ unidade.address.bairro }}<br>
+                {{ unidade.address.city }} - {{ unidade.address.state }}, CEP: {{ unidade.address.zipCode }}<br>
                 CNPJ: {{ unidade.cnpj }}
               </p>
             </div>

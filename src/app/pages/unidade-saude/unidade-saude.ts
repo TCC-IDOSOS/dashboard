@@ -1,7 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { UnidadeSaudeModalComponent } from '../../components/unidade-saude-modal/unidade-saude-modal';
 import { UnidadeSaude } from '../../shared/interfaces/unidade-saude.interface';
 import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
+import { UnidadeSaudeService } from '../../services/unidade-saude/unidade-saude-service';
 
 @Component({
   selector: 'app-unidade-saude-list',
@@ -9,15 +10,31 @@ import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
   imports: [UnidadeSaudeModalComponent, MenuLateral],
   templateUrl: './unidade-saude.html'
 })
-export default class UnidadeSaudeComponent {
+export default class UnidadeSaudeComponent implements OnInit{
   
-  unidades = signal<UnidadeSaude[]>([
-    { id: 1, nome: 'US Centro', rua: 'Rua Principal', numero: '12', bairro: 'Centro', cidade: 'Curitiba', uf: 'PR', cep: '01000-000', cnpj: '12.345.678/0001-90' },
-    { id: 2, nome: 'US Bairro Alto', rua: 'Av. das Torres', numero: '500', bairro: 'Bairro Alto', cidade: 'Curitiba', uf: 'PR', cep: '82000-000', cnpj: '98.765.432/0001-10' }
-  ]);
+  unidades = signal<UnidadeSaude[]>([]);
 
   modalAberto = signal(false);
   unidadeSelecionada = signal<UnidadeSaude | null>(null);
+
+  unidadeSaudeService = inject(UnidadeSaudeService)
+
+
+  ngOnInit(): void {
+    this.carregarUnidadesSaude();
+  }
+
+  carregarUnidadesSaude() {
+    this.unidadeSaudeService.listarUnidadesSaude().subscribe({
+      next: (dadosRetornados) => {
+        console.warn(dadosRetornados)
+        this.unidades.set(dadosRetornados); 
+      },
+      error: (erro) => {
+        console.error("Falha ao buscar as unidades de saúde: ", erro);
+      }
+    })
+  }
 
   abrirModalNovaUnidade() {
     this.unidadeSelecionada.set(null); 
@@ -34,9 +51,12 @@ export default class UnidadeSaudeComponent {
   }
 
   excluirUnidade(id: any) {
-    if(confirm('Tem certeza que deseja excluir esta unidade?')) {
-      console.log('Vai chamar o service de exclusão para o ID:', id);
+   this.unidadeSaudeService.excluirUnidadeSaude(id).subscribe({
+    next: () => {
+      alert('Unidade excluída com sucesso!');
+      this.carregarUnidadesSaude();
     }
+   })
   }
 
   recarregarLista() {

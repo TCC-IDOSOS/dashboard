@@ -4,9 +4,10 @@ import { FormsModule } from '@angular/forms';
 import { UserModalComponent } from '../../components/user-modal/user-modal';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
-import { UsuariosService } from '../../services/usuarios';
+import { UsuariosService } from '../../services/usuarios/usuarios';
 import { Paciente, Usuario } from '../../shared/interfaces/usuario.interface';
 import { Operacao } from '../../shared/interfaces/operacao.enum';
+import { LoginService } from '../../services/login/login';
 
 @Component({
   selector: 'app-user-list',
@@ -19,12 +20,13 @@ export default class UserListComponent implements OnInit{
   termoPesquisa = signal('');
   modalAberto = signal(false);
 
-  criarEditarUsuario = signal<Operacao.CRIAR_USUARIO | Operacao.EDITAR_USUARIO>(Operacao.CRIAR_USUARIO)
+  criarEditarUsuario = signal<Operacao.CRIAR| Operacao.EDITAR>(Operacao.CRIAR)
 
   usuarios = signal<Usuario[]>([]);
   usuarioSelecionado = signal<Usuario | null>(null);
 
   usuarioService = inject(UsuariosService);
+  loginService = inject(LoginService)
 
   ngOnInit(): void {
     this.carregarUsuarios();
@@ -45,7 +47,7 @@ export default class UserListComponent implements OnInit{
   novoUsuario() {
     this.usuarioSelecionado.set(null);
     this.modalAberto.set(true);
-    this.criarEditarUsuario.set(Operacao.CRIAR_USUARIO);
+    this.criarEditarUsuario.set(Operacao.CRIAR);
   }
 
   fecharModal() {
@@ -55,7 +57,7 @@ export default class UserListComponent implements OnInit{
   editarUsuario(usuario: Usuario) {
     this.modalAberto.set(true);
     this.usuarioSelecionado.set(usuario);
-    this.criarEditarUsuario.set(Operacao.EDITAR_USUARIO);
+    this.criarEditarUsuario.set(Operacao.EDITAR);
     console.log('Abrindo tela "Manter Usuário" com os dados:', usuario);
   }
 
@@ -64,7 +66,7 @@ export default class UserListComponent implements OnInit{
   }
 
   excluirUsuario(usuario: Usuario) {
-    console.log('Exlcuir usuario');
+    
   }
 
   usuariosFiltrados = computed(() => {

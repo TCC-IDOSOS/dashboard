@@ -1,4 +1,9 @@
-export interface Login {
-    usuario: string
-    senha: string
+export interface ILogin {
+    email: string
+    password: string
+}
+
+export interface Autenticacao {
+    token: string,
+    userId: string
 }

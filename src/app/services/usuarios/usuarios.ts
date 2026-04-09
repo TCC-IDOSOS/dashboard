@@ -1,7 +1,8 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Paciente, Usuario } from '../shared/interfaces/usuario.interface';
+import { Paciente, PerfilUsuario, Usuario } from '../../shared/interfaces/usuario.interface';
+import { environment } from '../../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -10,7 +11,7 @@ export class UsuariosService {
   
   private http = inject(HttpClient);
   
-  private apiUrl = ''; 
+  private apiUrl = environment.apiUrl; 
 
   static ID_USUARIO: number = 2
 
@@ -19,7 +20,7 @@ export class UsuariosService {
   }
 
   buscarUsuarioPorId(id: number): Observable<Usuario> {
-    return this.http.get<Usuario>(`${this.apiUrl}/usuario/${id}`);
+    return this.http.get<Usuario>(`${this.apiUrl}/users/${id}`);
   }
 
   cadastrarUsuario(usuario: Usuario): Observable<Usuario> {
@@ -34,4 +35,9 @@ export class UsuariosService {
   get idUsuario(): number {
     return UsuariosService.ID_USUARIO;
   }
+
+  dadosUsuarioLogado(): Observable<any> {
+    return this.http.get<any>(`${this.apiUrl}/users/me`);
+  }
+
 }
