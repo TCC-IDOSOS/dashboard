@@ -8,7 +8,7 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root'
 })
 export class UsuariosService {
-  
+
   private http = inject(HttpClient);
   
   private apiUrl = environment.apiUrl; 
