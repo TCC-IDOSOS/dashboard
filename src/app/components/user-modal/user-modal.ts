@@ -6,6 +6,8 @@ import { Genero, PerfilUsuario, Usuario } from '../../shared/interfaces/usuario.
 import { UsuariosService } from '../../services/usuarios/usuarios';
 import { Operacao } from '../../shared/interfaces/operacao.enum';
 import { ThisReceiver } from '@angular/compiler';
+import { UnidadeSaudeService } from '../../services/unidade-saude/unidade-saude-service';
+import { disabled } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-user-modal',
@@ -18,23 +20,42 @@ export class UserModalComponent implements OnInit {
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
   private userService = inject(UsuariosService)
+  private unidadeSaudeService = inject(UnidadeSaudeService)
 
   fechar = output<void>();
   usuario = input<Usuario | null>(null);
   criarEditarUsuario = input<Operacao.CRIAR | Operacao.EDITAR>(Operacao.CRIAR)
+  isEditing = false;
+
 
   userForm!: FormGroup;
   formErrorMessage: string | null = null;
   
-  // mocks para teste
-  //TODO: REMOVER
-  unidadesSaude = ['Unidade Central', 'Posto Norte', 'Clínica Sul', 'Hospital Leste'];
+  unidadesSaude: string[]= [];
   tiposUsuario = ['Paciente', 'Profissional', "Admin"];
   genres = [Genero.MASCULINO, Genero.FEMININO, Genero.PREFIRO_NAO_INFORMAR, Genero.OUTRO]
   usuarioSalvo = output<void>();
 
   ngOnInit(): void {
     const user = this.usuario(); 
+
+    this.unidadeSaudeService.listarUnidadesSaude().subscribe({
+      next: (dadosRetornados) => {
+        console.log(dadosRetornados)
+
+        dadosRetornados.forEach(unidade => this.unidadesSaude.push(unidade.name))
+        
+      },
+      error: (erro) => {
+        console.error("Falha ao buscar as unidades de saúde: ", erro);
+      }
+    })
+
+    this.isEditing = !!this.usuario();
+
+    console.warn(this.criarEditarUsuario() === Operacao.EDITAR,  !!this.usuario(), "aaaaaa")
+
+
 
     this.buildForm();
     this.setupCepListener();
@@ -59,6 +80,7 @@ export class UserModalComponent implements OnInit {
         password: user.password,
         unidadeSaude: user.unidadeSaude
       });
+      this.userForm.get('cpf')?.disable();
     }
   }
 
@@ -204,4 +226,5 @@ export class UserModalComponent implements OnInit {
     const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\W]{8,}$/;
     return passRegex.test(control.value) ? null : { weakPassword: true };
   }
+
 }

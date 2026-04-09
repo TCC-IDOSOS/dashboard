@@ -66,7 +66,17 @@ export default class UserListComponent implements OnInit{
   }
 
   excluirUsuario(usuario: Usuario) {
-    
+    this.usuarioService.deletarUsuario(usuario.id).subscribe({
+      next: () => {
+        alert('Usuário excluído com sucesso!');
+        this.carregarUsuarios();
+      }
+    })
+  }
+
+  recarregarLista() {
+    console.log('Atualizando a lista...');
+    this.fecharModal();
   }
 
   usuariosFiltrados = computed(() => {

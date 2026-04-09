@@ -32,6 +32,10 @@ export class UsuariosService {
     return this.http.put<Usuario>(`${this.apiUrl}/users/${id}`, usuario);
   }
 
+  deletarUsuario(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/users/${id}`);
+  }
+
   get idUsuario(): number {
     return UsuariosService.ID_USUARIO;
   }
