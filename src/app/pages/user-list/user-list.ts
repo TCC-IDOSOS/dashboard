@@ -2,7 +2,7 @@ import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms'; 
 import { UserModalComponent } from '../../components/user-modal/user-modal';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
 import { UsuariosService } from '../../services/usuarios/usuarios';
 import { Paciente, Usuario } from '../../shared/interfaces/usuario.interface';
@@ -16,6 +16,8 @@ import { LoginService } from '../../services/login/login';
   templateUrl: './user-list.html'
 })
 export default class UserListComponent implements OnInit{
+
+  private router = inject(Router);
 
   termoPesquisa = signal('');
   modalAberto = signal(false);
@@ -62,7 +64,7 @@ export default class UserListComponent implements OnInit{
   }
 
   visualizarTestes(usuario: Usuario) {
-    console.log('Navegando para "Listar teste" do usuário:', usuario.id);
+    this.router.navigate(['/testes'], { queryParams: { email: usuario.email, id: usuario.id }});
   }
 
   excluirUsuario(usuario: Usuario) {
