@@ -1,0 +1,112 @@
+<div class="flex h-screen bg-white font-sans text-gray-800">
+
+  <app-menu-lateral />
+
+  <main class="flex-1 p-10 overflow-y-auto bg-white">
+    
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-1">Testes Realizados</h1>
+      <p class="text-gray-500">Visualize e gerencie todos os testes</p>
+    </div>
+
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+      
+      <div class="w-full sm:w-2/3 md:w-1/2">
+        <input 
+          type="text" 
+          [(ngModel)]="termoPesquisa" 
+          placeholder="Pesquisar por paciente, teste ou CPF..." 
+          class="w-full bg-gray-100 border border-transparent rounded-lg px-4 py-2.5 text-sm focus:border-gray-300 focus:bg-white focus:ring-0 transition-colors">
+      </div>
+
+      <div class="flex space-x-3 w-full sm:w-auto">
+        
+        <!-- <button (click)="gerarRelatorio()" class="flex-1 sm:flex-none px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+          <span>Gerar Relatório</span>
+        </button> -->
+
+        <button (click)="abrirFiltros()" class="flex-1 sm:flex-none px-4 py-2.5 border border-gray-900 rounded-lg text-sm font-medium text-gray-900 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
+          <span>Filtros</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="overflow-x-auto border border-gray-200 rounded-lg">
+      <table class="min-w-full text-left text-sm whitespace-nowrap">
+        
+        <thead class="bg-white border-b border-gray-200 text-gray-500">
+          <tr>
+            <th scope="col" class="px-4 py-3 font-medium">Teste</th>
+            <th scope="col" class="px-4 py-3 font-medium">Paciente</th>
+            <th scope="col" class="px-4 py-3 font-medium text-center">Data/Hora</th>
+            <th scope="col" class="px-4 py-3 font-medium text-center">Repetições</th>
+            <th scope="col" class="px-4 py-3 font-medium text-center">Altura Média</th>
+            <th scope="col" class="px-4 py-3 font-medium text-center">Cadência</th>
+            <th scope="col" class="px-4 py-3 font-medium">Classificação</th>
+            <th scope="col" class="px-4 py-3 font-medium">Unidade</th>
+            <th scope="col" class="px-4 py-3 font-medium text-center">Ações</th>
+          </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-200">
+          @for (teste of testes(); track teste.id) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              
+              <td class="px-4 py-3">
+                <div class="text-gray-900 font-medium">{{ teste.nomeTeste }}</div>
+                <div class="text-gray-400 text-xs mt-0.5">{{ teste.nomeProfissional }}</div>
+              </td>
+
+              <td class="px-4 py-3">
+                <div class="text-gray-900">{{ teste.paciente }}</div>
+                <div class="text-gray-400 text-xs mt-0.5">{{ teste.cpfPaciente }}</div>
+              </td>
+
+              <td class="px-4 py-3 text-center text-gray-600">{{ teste.dataHora }}</td>
+              <td class="px-4 py-3 text-center text-gray-600">{{ teste.repeticoes }}</td>
+              <td class="px-4 py-3 text-center text-gray-600">{{ teste.alturaMedia }}</td>
+              <td class="px-4 py-3 text-center text-gray-600">{{ teste.cadencia }}</td>
+
+              <td class="px-4 py-3">
+                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-md"
+                      [ngClass]="{
+                        'bg-black text-white': teste.classificacao === 'Acima da Média',
+                        'bg-gray-200 text-gray-800': teste.classificacao === 'Na Média',
+                        'bg-red-100 text-red-800': teste.classificacao === 'Abaixo da Média'
+                      }">
+                  {{ teste.classificacao }}
+                </span>
+              </td>
+
+              <td class="px-4 py-3 text-gray-600">{{ teste.unidadeSaude }}</td>
+
+              <td class="px-4 py-3 text-center">
+                <button (click)="verDetalhes(teste.id)" class="text-gray-900 hover:text-blue-600 transition-colors" title="Ver detalhes">
+                  <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                </button>
+              </td>
+
+            </tr>
+          }
+
+          @if (testesFiltrados().length === 0) {
+            <tr>
+              <td colspan="9" class="px-4 py-8 text-center text-gray-500">
+                Nenhum teste encontrado para a sua pesquisa.
+              </td>
+            </tr>
+          }
+        </tbody>
+
+      </table>
+    </div>
+
+  </main>
+</div>
+
+<app-resultado-teste #modalDetalhe />

@@ -10,6 +10,8 @@ export const routes: Routes = [
           { path: "usuarios", loadComponent: () => import("./pages/user-list/user-list") },
           { path: "perfil", loadComponent: () => import("./pages/perfil-usuario/perfil-usuario") },
           { path: "unidades-saude", loadComponent: () => import("./pages/unidade-saude/unidade-saude")},
+          { path: "testes", loadComponent: () => import("./pages/testes-list/testes-list")},
+          { path: "home", loadComponent: () => import("./pages/home/home") }
         ]
     },
     { path: "", redirectTo: "login", pathMatch: "full" },
