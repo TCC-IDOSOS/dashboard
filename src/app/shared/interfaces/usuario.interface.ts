@@ -25,7 +25,7 @@ export interface Usuario {
     telefone: string
     ativo: string
     password: string,
-    unidadeSaude: UnidadeSaude
+    healthUnit: UnidadeSaude
 }
 
 export enum PerfilUsuario {

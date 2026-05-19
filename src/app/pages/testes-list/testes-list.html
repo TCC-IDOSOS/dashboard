@@ -20,15 +20,17 @@
       </div>
 
       <div class="flex space-x-3 w-full sm:w-auto">
-        
-        <!-- <button (click)="gerarRelatorio()" class="flex-1 sm:flex-none px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-          <span>Gerar Relatório</span>
-        </button> -->
 
-        <button (click)="abrirFiltros()" class="flex-1 sm:flex-none px-4 py-2.5 border border-gray-900 rounded-lg text-sm font-medium text-gray-900 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
+        <button (click)="abrirFiltros()" class="relative flex-1 sm:flex-none px-4 py-2.5 border border-gray-900 rounded-lg text-sm font-medium text-gray-900 bg-white hover:bg-gray-50 transition-colors flex items-center justify-center space-x-2">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path></svg>
           <span>Filtros</span>
+          
+          @if (dataInicioFiltro() || dataFimFiltro()) {
+            <span class="absolute top-0 right-0 -mt-1 -mr-1 flex h-3 w-3">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-3 w-3 bg-red-500"></span>
+            </span>
+          }
         </button>
       </div>
     </div>
@@ -51,17 +53,17 @@
         </thead>
 
         <tbody class="divide-y divide-gray-200">
-          @for (teste of testes(); track teste.id) {
+          @for (teste of testesFiltrados(); track teste.id) {
             <tr class="hover:bg-gray-50 transition-colors">
               
               <td class="px-4 py-3">
                 <div class="text-gray-900 font-medium">{{ teste.nomeTeste }}</div>
-                <div class="text-gray-400 text-xs mt-0.5">{{ teste.nomeProfissional }}</div>
+                <div class="text-gray-400 text-xs mt-0.5">{{ teste.profissional }}</div>
               </td>
 
               <td class="px-4 py-3">
                 <div class="text-gray-900">{{ teste.paciente }}</div>
-                <div class="text-gray-400 text-xs mt-0.5">{{ teste.cpfPaciente }}</div>
+                <div class="text-gray-400 text-xs mt-0.5">{{ teste.cpf }}</div>
               </td>
 
               <td class="px-4 py-3 text-center text-gray-600">{{ teste.dataHora }}</td>
@@ -80,7 +82,7 @@
                 </span>
               </td>
 
-              <td class="px-4 py-3 text-gray-600">{{ teste.unidadeSaude }}</td>
+              <td class="px-4 py-3 text-gray-600">{{ teste.unidade }}</td>
 
               <td class="px-4 py-3 text-center">
                 <button (click)="verDetalhes(teste.id)" class="text-gray-900 hover:text-blue-600 transition-colors" title="Ver detalhes">
@@ -110,3 +112,10 @@
 </div>
 
 <app-resultado-teste #modalDetalhe />
+
+@if (modalFiltroAberto()) {
+  <app-filtro-data-modal 
+    (fechar)="fecharFiltros()" 
+    (aplicar)="aplicarFiltroData($event)">
+  </app-filtro-data-modal>
+}

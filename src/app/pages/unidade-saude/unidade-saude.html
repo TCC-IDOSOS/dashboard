@@ -15,11 +15,11 @@
       </div>
   
       <div class="mb-6">
-        <input type="text" placeholder="Pesquisar" class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white shadow-sm transition-colors">
+        <input type="text" [ngModel]="termoPesquisa()" (ngModelChange)="termoPesquisa.set($event)" placeholder="Pesquisar por nome ou CNPJ..." class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm focus:border-blue-500 focus:ring-blue-500 focus:bg-white shadow-sm transition-colors">
       </div>
   
       <div class="space-y-4">
-        @for (unidade of unidades(); track unidade.id) {
+        @for (unidade of unidadesFiltradas(); track unidade.id) {
           <div class="border border-gray-200 rounded-xl p-5 flex justify-between items-start bg-white shadow-sm hover:shadow-md transition-shadow">
             
             <div>

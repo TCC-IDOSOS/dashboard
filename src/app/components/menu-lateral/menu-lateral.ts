@@ -5,6 +5,7 @@ import { LoginService } from '../../services/login/login';
 
 @Component({
   selector: 'app-menu-lateral',
+  standalone: true,
   imports: [RouterLink, RouterLinkActive],
   templateUrl: './menu-lateral.html',
   styleUrl: './menu-lateral.css',
@@ -18,12 +19,11 @@ export class MenuLateral implements OnInit{
 
   ngOnInit(): void {
     const idUsuario = this.loginService.getIdUsuarioLogado();
-    console.log(this.isProfissional, idUsuario);
+
     if (idUsuario) {
       this.usuarioService.buscarUsuarioPorId(idUsuario).subscribe({
         next: (dadosRetornados) => {
           this.isProfissional = dadosRetornados.profile === 'Profissional';
-          console.log(this.isProfissional);
         },
         error: (erro) => {
           console.error("Falha ao buscar os usuários: ", erro);

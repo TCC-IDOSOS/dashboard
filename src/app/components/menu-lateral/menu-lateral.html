@@ -8,6 +8,7 @@
       </div>
 
       <nav class="p-4 space-y-2">
+        @if(isProfissional) {
         <a routerLink="/home" routerLinkActive="bg-black text-white" [routerLinkActiveOptions]="{exact: true}"
           class="flex items-center space-x-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -17,7 +18,9 @@
           </svg>
           <span class="font-medium">Home</span>
         </a>
+        }
 
+        @if(isProfissional) {
         <a routerLink="/usuarios" routerLinkActive="bg-black text-white" [routerLinkActiveOptions]="{exact: true}" class="flex items-center space-x-3 px-4 py-2.5 rounded-lg bg-black text-white transition-colors">
           <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -25,6 +28,7 @@
           </svg>
           <span class="font-medium">Usuários</span>
         </a>
+        }
 
         <a routerLink="/testes" routerLinkActive="bg-black text-white" [routerLinkActiveOptions]="{exact: true}"
           class="flex items-center space-x-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
@@ -45,6 +49,18 @@
             </path>
           </svg>
           <span class="font-medium">Unidades de Saúde</span>
+        </a>
+        }
+
+        @if(isProfissional) {
+          <a routerLink="/gerar-relatorio" routerLinkActive="bg-black text-white" [routerLinkActiveOptions]="{exact: true}"
+          class="flex items-center space-x-3 px-4 py-2.5 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors">
+          <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m3-4h1m-1 4h1m-5 8h5">
+            </path>
+          </svg>
+          <span class="font-medium">Relatórios</span>
         </a>
         }
 

@@ -82,10 +82,7 @@ export class UnidadeSaudeModalComponent implements OnInit {
 
   salvar() {
     this.formErrorMessage = null;
-    // if (this.userForm.invalid) {
-    //   this.handleValidationErrors();
-    //   return;
-    // }
+
     if (this.unidadeForm.valid) {
       const formData = this.unidadeForm.getRawValue();
       const isEdicao = !!this.unidade();

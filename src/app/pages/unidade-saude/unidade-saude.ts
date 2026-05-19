@@ -1,4 +1,5 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, computed } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { UnidadeSaudeModalComponent } from '../../components/unidade-saude-modal/unidade-saude-modal';
 import { UnidadeSaude } from '../../shared/interfaces/unidade-saude.interface';
 import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
@@ -7,12 +8,13 @@ import { UnidadeSaudeService } from '../../services/unidade-saude/unidade-saude-
 @Component({
   selector: 'app-unidade-saude-list',
   standalone: true,
-  imports: [UnidadeSaudeModalComponent, MenuLateral],
+  imports: [UnidadeSaudeModalComponent, MenuLateral, FormsModule],
   templateUrl: './unidade-saude.html'
 })
 export default class UnidadeSaudeComponent implements OnInit{
   
   unidades = signal<UnidadeSaude[]>([]);
+  termoPesquisa = signal('');
 
   modalAberto = signal(false);
   unidadeSelecionada = signal<UnidadeSaude | null>(null);
@@ -27,7 +29,6 @@ export default class UnidadeSaudeComponent implements OnInit{
   carregarUnidadesSaude() {
     this.unidadeSaudeService.listarUnidadesSaude().subscribe({
       next: (dadosRetornados) => {
-        console.warn(dadosRetornados)
         this.unidades.set(dadosRetornados); 
       },
       error: (erro) => {
@@ -35,6 +36,16 @@ export default class UnidadeSaudeComponent implements OnInit{
       }
     })
   }
+
+  unidadesFiltradas = computed(() => {
+    const termo = this.termoPesquisa().toLowerCase();
+    if (!termo) return this.unidades();
+
+    return this.unidades().filter(u => 
+      u.name.toLowerCase().includes(termo) ||
+      u.cnpj.includes(termo)
+    );
+  });
 
   abrirModalNovaUnidade() {
     this.unidadeSelecionada.set(null); 
@@ -60,7 +71,6 @@ export default class UnidadeSaudeComponent implements OnInit{
   }
 
   recarregarLista() {
-    console.log('Atualizando a lista...');
     this.fecharModal();
   }
 }

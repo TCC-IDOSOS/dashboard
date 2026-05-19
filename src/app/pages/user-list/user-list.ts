@@ -29,9 +29,23 @@ export default class UserListComponent implements OnInit{
 
   usuarioService = inject(UsuariosService);
   loginService = inject(LoginService)
+  isPacienteLogado = signal<boolean>(false);
 
   ngOnInit(): void {
     this.carregarUsuarios();
+
+    const idUsuario = this.loginService.getIdUsuarioLogado();
+    
+    if (idUsuario) {
+      this.usuarioService.buscarUsuarioPorId(idUsuario).subscribe({
+        next: (dadosRetornados) => {
+          this.isPacienteLogado.set(dadosRetornados.profile === 'Paciente');
+        },
+        error: (erro) => {
+          console.error("Falha ao buscar os dados do usuário logado: ", erro);
+        }
+      })
+    }
   }
 
   carregarUsuarios() {
@@ -44,7 +58,6 @@ export default class UserListComponent implements OnInit{
       }
     })
   }
-
 
   novoUsuario() {
     this.usuarioSelecionado.set(null);
@@ -60,7 +73,6 @@ export default class UserListComponent implements OnInit{
     this.modalAberto.set(true);
     this.usuarioSelecionado.set(usuario);
     this.criarEditarUsuario.set(Operacao.EDITAR);
-    console.log('Abrindo tela "Manter Usuário" com os dados:', usuario);
   }
 
   visualizarTestes(usuario: Usuario) {
@@ -77,7 +89,6 @@ export default class UserListComponent implements OnInit{
   }
 
   recarregarLista() {
-    console.log('Atualizando a lista...');
     this.fecharModal();
   }
 

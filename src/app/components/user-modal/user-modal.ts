@@ -32,6 +32,7 @@ export class UserModalComponent implements OnInit {
   formErrorMessage: string | null = null;
   
   unidadesSaude: string[]= [];
+  unidadesSaudeList: any[] = [];
   tiposUsuario = ['Paciente', 'Profissional', "Admin"];
   genres = [Genero.MASCULINO, Genero.FEMININO, Genero.PREFIRO_NAO_INFORMAR, Genero.OUTRO]
   usuarioSalvo = output<void>();
@@ -41,8 +42,7 @@ export class UserModalComponent implements OnInit {
 
     this.unidadeSaudeService.listarUnidadesSaude().subscribe({
       next: (dadosRetornados) => {
-        console.log(dadosRetornados)
-
+        this.unidadesSaudeList = dadosRetornados;
         dadosRetornados.forEach(unidade => this.unidadesSaude.push(unidade.name))
         
       },
@@ -52,10 +52,6 @@ export class UserModalComponent implements OnInit {
     })
 
     this.isEditing = !!this.usuario();
-
-    console.warn(this.criarEditarUsuario() === Operacao.EDITAR,  !!this.usuario(), "aaaaaa")
-
-
 
     this.buildForm();
     this.setupCepListener();
@@ -78,7 +74,7 @@ export class UserModalComponent implements OnInit {
         telefone: user.telefone,
         ativo: "sim",
         password: user.password,
-        unidadeSaude: user.unidadeSaude
+        unidadeSaude: user.healthUnit.name
       });
       this.userForm.get('cpf')?.disable();
     }
@@ -101,7 +97,7 @@ export class UserModalComponent implements OnInit {
       unidadeSaude: ['', Validators.required],
       genre: ['', Validators.required],
       profile: ['', Validators.required],
-      password: ['', [Validators.required, this.passwordValidator]]
+      password: ['', this.isEditing ? [this.passwordValidator] : [Validators.required, this.passwordValidator]]
     });
   }
 
@@ -125,14 +121,11 @@ export class UserModalComponent implements OnInit {
 
   salvar(): void {
     this.formErrorMessage = null;
-    if (this.userForm.invalid) {
-      this.handleValidationErrors();
-      return;
-    }
 
     const userData = this.userForm.getRawValue();
+    const selectedUnit = this.unidadesSaudeList.find(u => u.name === userData.unidadeSaude);
 
-    const payload: Usuario = {
+    const payload: any = {
       name: userData.name,
       email: userData.email,
       birthDate: userData.birthDate,
@@ -152,8 +145,28 @@ export class UserModalComponent implements OnInit {
       telefone: userData.telefone,
       ativo: "sim",
       password: userData.password,
-      unidadeSaude: userData.unidadeSaude
+      healthUnit: selectedUnit ? {
+        name: selectedUnit.name,
+        cnpj: selectedUnit.cnpj,
+        phone: selectedUnit.phone || "",
+        email: selectedUnit.email || "",
+        address: {
+          streetName: selectedUnit.address?.streetName || "",
+          streetNumber: selectedUnit.address?.streetNumber || "",
+          complement: selectedUnit.address?.complement || "",
+          city: selectedUnit.address?.city || "",
+          state: selectedUnit.address?.state || "",
+          zipCode: selectedUnit.address?.zipCode || "",
+          neighborhood: selectedUnit.address?.bairro || selectedUnit.address?.neighborhood || ""
+        }
+      } : null
+    };
+
+    if (this.userForm.invalid) {
+      this.handleValidationErrors();
+      return;
     }
+
 
     if(this.criarEditarUsuario() === Operacao.CRIAR) {
       this.userService.cadastrarUsuario(payload).subscribe({
@@ -181,8 +194,8 @@ export class UserModalComponent implements OnInit {
   private handleValidationErrors(): void {
     const controls = this.userForm.controls;
     
-    const hasEmptyFields = Object.values(controls).some(c => c.errors?.['required']);
-    if (hasEmptyFields) {
+    const emptyFields = Object.keys(controls).filter(key => controls[key].errors?.['required']);
+    if (emptyFields.length > 0) {
       this.formErrorMessage = 'Favor preencher todos os campos';
       return;
     }

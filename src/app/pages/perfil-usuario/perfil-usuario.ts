@@ -45,7 +45,7 @@ export default class ProfileComponent implements OnInit {
             bairro: user.address?.bairro,
             city: user.address?.city,
             state: user.address?.state,
-            unidadeSaude: user.unidadeSaude,
+            unidadeSaude: user.healthUnit.name || '',
             password: user.password
           });
         },
@@ -99,7 +99,6 @@ export default class ProfileComponent implements OnInit {
     }
 
     const formData = this.profileForm.getRawValue();
-    console.log('Salvando no banco de dados...', formData);
     alert('Alterações salvas com sucesso!');
   }
 
