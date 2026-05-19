@@ -11,7 +11,8 @@ export const routes: Routes = [
           { path: "perfil", loadComponent: () => import("./pages/perfil-usuario/perfil-usuario") },
           { path: "unidades-saude", loadComponent: () => import("./pages/unidade-saude/unidade-saude")},
           { path: "testes", loadComponent: () => import("./pages/testes-list/testes-list")},
-          { path: "home", loadComponent: () => import("./pages/home/home") }
+          { path: "home", loadComponent: () => import("./pages/home/home") },
+          { path: "gerar-relatorio", loadComponent: () => import("./pages/gerar-relatorio/gerar-relatorio") },
         ]
     },
     { path: "", redirectTo: "login", pathMatch: "full" },
