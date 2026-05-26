@@ -22,7 +22,7 @@ export interface Usuario {
     email: string
     profile: PerfilUsuario,
     address: Endereco
-    telefone: string
+    phone: string
     ativo: string
     password: string,
     healthUnit: UnidadeSaude

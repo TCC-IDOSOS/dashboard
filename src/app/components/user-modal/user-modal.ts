@@ -55,26 +55,25 @@ export class UserModalComponent implements OnInit {
 
     this.buildForm();
     this.setupCepListener();
+
     if (user) {
       this.userForm.patchValue({
         name: user.name,
         email: user.email,
-        birthDate: user.birthDate.toString().split('T')[0],
+        birthDate: user.birthDate ? user.birthDate.toString().split('T')[0] : '',
         cpf: user.cpf,
-        zipCode: user.address.zipCode,
-        streetName: user.address.streetName,
-        streetNumber: user.address.streetNumber,
-        bairro: user.address.bairro,
-        city: user.address.city,
-        state: user.address.state,
-        complement: user.address.complement,
-        id: '',
+        zipCode: user.address?.zipCode,
+        streetName: user.address?.streetName,
+        streetNumber: user.address?.streetNumber,
+        bairro: user.address?.bairro,
+        city: user.address?.city,
+        state: user.address?.state,
+        complement: user.address?.complement,
         genre: user.genre,
         profile: user.profile,
-        telefone: user.telefone,
-        ativo: "sim",
+        phone: user.phone,
         password: user.password,
-        unidadeSaude: user.healthUnit.name
+        unidadeSaude: user.healthUnit?.name
       });
       this.userForm.get('cpf')?.disable();
     }
@@ -97,6 +96,7 @@ export class UserModalComponent implements OnInit {
       unidadeSaude: ['', Validators.required],
       genre: ['', Validators.required],
       profile: ['', Validators.required],
+      phone: ['', Validators.required],
       password: ['', this.isEditing ? [this.passwordValidator] : [Validators.required, this.passwordValidator]]
     });
   }
@@ -139,10 +139,10 @@ export class UserModalComponent implements OnInit {
         state: userData.state,
         complement: userData.complement
       },
-      id: this.criarEditarUsuario() ===  Operacao.EDITAR ? userData.id : this.userService.idUsuario,
+      id: this.criarEditarUsuario() ===  Operacao.EDITAR ? this.usuario()!.id : this.userService.idUsuario,
       genre: userData.genre,
       profile: userData.profile,
-      telefone: userData.telefone,
+      phone: userData.phone,
       ativo: "sim",
       password: userData.password,
       healthUnit: selectedUnit ? {

@@ -4,7 +4,6 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
 import { TestesService } from '../../services/testes/testesService';
-import { TesteListagem } from '../../shared/interfaces/testes.interface';
 import { catchError, forkJoin, map, of, switchMap } from 'rxjs';
 import { UsuariosService } from '../../services/usuarios/usuarios';
 import { ResultadoTesteComponent } from '../resultado-teste/resultado-teste';
@@ -81,13 +80,22 @@ export default class TestesListComponent implements OnInit {
                       paciente: usuario.name, 
                       cpf: this.formatarCpf(usuario.cpf),
                       profissional: 'Avaliador', 
-                      unidade: usuario.healthUnit.name || 'Não informada',
+                      unidade: usuario.healthUnit?.name || 'Não informada',
 
                       repeticoes: detalhe.repeticoes_completas || 0,
                       alturaMedia: Number(detalhe.altura_media || 0).toFixed(2),
                       cadencia: Number(detalhe.cadencia || 0).toFixed(2),
                       classificacao: detalhe.classificacao || 'Não Avaliado',
-                      cycles: detalhe.cycles || 0
+                      cycles: detalhe.cycles || [],
+
+                      nomeProfissional: 'Avaliador',
+                      unidadeSaude: usuario.healthUnit?.name || 'Não informada',
+                      avaliador: {
+                        nome: 'Avaliador',
+                        unidade: usuario.healthUnit?.name || 'Não informada',
+                        dataHora: teste.createdAt
+                      },
+                      metricas: detalhe
                     })),
                     catchError(() => of(null)) 
                   )
@@ -163,7 +171,13 @@ export default class TestesListComponent implements OnInit {
 
   verDetalhes(testeId: number) {
     const testeSelecionado = this.testes().find(t => t.id === testeId);
-    this.modalDetalhe.abrir(testeSelecionado);
+    
+    const dadosModal = {
+      ...testeSelecionado,
+      dataHora: testeSelecionado.dataOriginal
+    };
+
+    this.modalDetalhe.abrir(dadosModal);
   }
 
   gerarRelatorio() {
