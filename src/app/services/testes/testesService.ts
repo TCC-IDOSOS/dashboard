@@ -22,7 +22,6 @@ export class TestesService {
   }
 
   buscarListaTestesUsuario(id: number, email: string = ''): Observable<TesteListagem[]> {
-    console.warn("Chamou o serviço de testes")
     let params = new HttpParams();
     if (email) {
       params = params.set('email', email);

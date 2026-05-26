@@ -122,9 +122,6 @@ export class UnidadeSaudeModalComponent implements OnInit {
         });
       }
 
-      console.log('Dados do Form:', payload);
-      console.log('Modo de operação:', isEdicao ? 'PUT' : 'POST');
-
     } else {
       this.unidadeForm.markAllAsTouched();
     }
