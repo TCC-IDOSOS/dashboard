@@ -28,9 +28,9 @@
           <div class="space-y-2 text-sm">
             <p><span class="font-bold text-gray-900 w-24 inline-block">Nome:</span> {{ dados()?.paciente }}</p>
             <p><span class="font-bold text-gray-900 w-24 inline-block">CPF:</span> {{ dados()?.cpf }}</p>
-            <p><span class="font-bold text-gray-900 w-24 inline-block">Idade:</span> 73 anos</p>
+            <p><span class="font-bold text-gray-900 w-24 inline-block">Idade:</span> {{ dados()?.idade }} anos</p>
             <p><span class="font-bold text-gray-900 w-24 inline-block">Endereço:</span> {{ dados()?.unidade }}</p>
-            <p><span class="font-bold text-gray-900 w-24 inline-block">Quedas:</span> 2 quedas registradas</p>
+            <p><span class="font-bold text-gray-900 w-24 inline-block">Quedas:</span> {{ dados()?.quedas }} quedas registradas</p>
           </div>
         </section>
 

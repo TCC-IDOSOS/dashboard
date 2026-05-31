@@ -1,4 +1,4 @@
-import { Component, signal, inject, OnInit } from '@angular/core';
+import { Component, signal, inject, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
@@ -32,6 +32,15 @@ export default class GerarRelatorio implements OnInit {
   unidadesDisponiveis = signal<string[]>([]);
   regioesDisponiveis = signal(['Centro', 'Norte', 'Sul', 'Leste', 'Oeste']);
 
+  pacientes = signal<any[]>([]);
+  mostrarDropdown = signal(false);
+
+  pacientesFiltrados = computed(() => {
+    const termo = this.nomeIdoso().toLowerCase();
+    if (!termo || !this.mostrarDropdown()) return [];
+    return this.pacientes().filter(p => p.name.toLowerCase().includes(termo));
+  });
+
   ngOnInit(): void {
     this.unidadeSaudeService.listarUnidadesSaude().subscribe({
       next: (unidades) => {
@@ -42,6 +51,22 @@ export default class GerarRelatorio implements OnInit {
         this.unidadesDisponiveis.set([]);
       }
     });
+
+    this.usuarioService.listarPacientes().subscribe({
+      next: (usuarios) => {
+        this.pacientes.set(usuarios.filter(u => u.profile === 'Paciente'));
+      },
+      error: (err) => console.error("Erro ao carregar pacientes", err)
+    });
+  }
+
+  selecionarPaciente(nome: string) {
+    this.nomeIdoso.set(nome);
+    this.mostrarDropdown.set(false);
+  }
+
+  esconderDropdownTimeout() {
+    setTimeout(() => this.mostrarDropdown.set(false), 200);
   }
 
   gerarRelatorio() {
@@ -58,15 +83,23 @@ export default class GerarRelatorio implements OnInit {
 
     this.usuarioService.listarPacientes().pipe(
       map(usuarios => {
-        // Filtra usuários pelos campos do formulário antes de buscar os testes
         let usuariosFiltrados = usuarios;
         if (this.nomeIdoso()) {
           usuariosFiltrados = usuariosFiltrados.filter(u => u.name.toLowerCase().includes(this.nomeIdoso().toLowerCase()));
         }
         if (this.unidadeSaude()) {
-          usuariosFiltrados = usuariosFiltrados.filter(u => (u.healthUnit as unknown as string) === this.unidadeSaude());
+          usuariosFiltrados = usuariosFiltrados.filter(u => u.healthUnit?.name === this.unidadeSaude());
         }
-        // O filtro de idade será aplicado depois, pois precisamos da data do teste
+        
+        if (this.idade()) {
+          const idadeFiltro = Number(this.idade());
+          usuariosFiltrados = usuariosFiltrados.filter(u => {
+            if (!u.birthDate) return false;
+            const idadeAtual = this.calcularIdade(u.birthDate, new Date().toISOString());
+            return idadeAtual === idadeFiltro;
+          });
+        }
+        
         return usuariosFiltrados;
       }),
       switchMap(usuarios => {
@@ -91,9 +124,9 @@ export default class GerarRelatorio implements OnInit {
                     tipoTeste: teste.testType === 'MARCHA' ? 'Marcha Estacionária' : teste.testType,
                     dataHora: this.formatarDataParaRelatorio(teste.createdAt),
                     unidadeSaude: usuario.healthUnit.name || 'Não informada',
-                    repeticoes: detalhe.repeticoes_completas || 0,
-                    alturaMedia: Number(detalhe.altura_media || 0).toFixed(2),
-                    cadencia: Number(detalhe.cadencia || 0).toFixed(2),
+                    repeticoes: detalhe.repeticoes_completas ?? detalhe.n_peaks ?? (detalhe.peaks_t_s ? detalhe.peaks_t_s.length : 0),
+                    alturaMedia: Number(detalhe.altura_media ?? detalhe.vel_mean_deg_s ?? 0).toFixed(2),
+                    cadencia: Number(detalhe.cadencia ?? detalhe.cadence_cycles_min ?? 0).toFixed(2),
                     classificacao: detalhe.classificacao || 'Não Avaliado'
                   })),
                   catchError(() => of(null))
@@ -109,11 +142,6 @@ export default class GerarRelatorio implements OnInit {
     ).subscribe({
       next: (dadosAninhados: any[][]) => {
         let dadosFinais = dadosAninhados.flat().filter(d => d !== null);
-
-        // Aplica filtro de idade final
-        if (this.idade()) {
-          dadosFinais = dadosFinais.filter(d => d.idade === Number(this.idade()));
-        }
 
         if (dadosFinais.length === 0) {
           alert("Nenhum resultado encontrado para os filtros aplicados.");
@@ -140,6 +168,7 @@ export default class GerarRelatorio implements OnInit {
   }
 
   private calcularIdade(dataNascimento: string | Date, dataTeste: string): number {
+    if (!dataNascimento) return 0;
     const nascimento = new Date(dataNascimento);
     const teste = new Date(dataTeste);
     let idade = teste.getFullYear() - nascimento.getFullYear();

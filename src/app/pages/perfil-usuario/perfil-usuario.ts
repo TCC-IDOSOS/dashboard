@@ -6,6 +6,9 @@ import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
 import { LoginService } from '../../services/login/login';
 import { Router } from '@angular/router';
 import { UsuariosService } from '../../services/usuarios/usuarios';
+import { UnidadeSaudeService } from '../../services/unidade-saude/unidade-saude-service';
+import { Usuario } from '../../shared/interfaces/usuario.interface';
+import { disabled } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-profile',
@@ -19,21 +22,39 @@ export default class ProfileComponent implements OnInit {
   private loginService = inject(LoginService);
   private router = inject(Router);
   private usuariosService = inject(UsuariosService);
+  private unidadeSaudeService = inject(UnidadeSaudeService)
 
   profileForm!: FormGroup;
   formErrorMessage = signal<string | null>(null);
 
-  unidadesSaude = ['Unidade Central', 'Posto Norte', 'Clínica Sul', 'Hospital Leste'];
+  unidadesSaude: string[]= [];
+  unidadesSaudeList: any[] = [];
+
+  idUsuario: number | null = null;
+  usuarioLogado: Usuario = {} as Usuario;
 
   ngOnInit(): void {
     this.buildForm();
     this.setupCepListener();
 
-    const idUsuario = this.loginService.getIdUsuarioLogado();
+    this.unidadeSaudeService.listarUnidadesSaude().subscribe({
+      next: (dadosRetornados) => {
+        this.unidadesSaudeList = dadosRetornados;
+        dadosRetornados.forEach(unidade => this.unidadesSaude.push(unidade.name))
+        
+      },
+      error: (erro) => {
+        console.error("Falha ao buscar as unidades de saúde: ", erro);
+      }
+    })
+
+    this.idUsuario = this.loginService.getIdUsuarioLogado();
     
-    if (idUsuario) {
-      this.usuariosService.buscarUsuarioPorId(idUsuario).subscribe({
+    if (this.idUsuario) {
+      this.usuariosService.buscarUsuarioPorId(this.idUsuario).subscribe({
         next: (user) => {
+          this.usuarioLogado = user;
+          console.warn(user)
           this.profileForm.patchValue({
             name: user.name,
             email: user.email,
@@ -45,7 +66,7 @@ export default class ProfileComponent implements OnInit {
             bairro: user.address?.bairro,
             city: user.address?.city,
             state: user.address?.state,
-            unidadeSaude: user.healthUnit.name || '',
+            unidadeSaude: user.healthUnit.name,
             password: user.password
           });
         },
@@ -58,7 +79,7 @@ export default class ProfileComponent implements OnInit {
     this.profileForm = this.fb.group({
       name: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]], 
-      birthDate: ['', [Validators.required, this.pastDateValidator]], 
+      birthDate: [{ value: '', disabled: true }], 
       cpf: ['', [Validators.required, this.cpfValidator]], 
       zipCode: ['', Validators.required],
       streetName: [{ value: '', disabled: true }], 
@@ -67,7 +88,7 @@ export default class ProfileComponent implements OnInit {
       city: [{ value: '', disabled: true }], 
       state: [{ value: '', disabled: true }], 
       unidadeSaude: ['', Validators.required],
-      password: ['', Validators.required]
+      password: ['', [this.passwordValidator]]
     });
   }
 
@@ -98,8 +119,51 @@ export default class ProfileComponent implements OnInit {
       return;
     }
 
-    const formData = this.profileForm.getRawValue();
-    alert('Alterações salvas com sucesso!');
+    const userData = this.profileForm.getRawValue();
+    const selectedUnit = this.unidadesSaudeList.find(u => u.name === userData.unidadeSaude);
+
+    const payload: any = {
+      name: userData.name,
+      email: userData.email,
+      birthDate: this.usuarioLogado.birthDate,
+      cpf: this.usuarioLogado.cpf,
+      address: {
+        zipCode: userData.zipCode,
+        streetName: userData.streetName,
+        streetNumber: userData.streetNumber,
+        bairro: userData.bairro,
+        city: userData.city,
+        state: userData.state,
+        complement: userData.complement
+      },
+      id: this.idUsuario,
+      genre: this.usuarioLogado.genre,
+      profile: this.usuarioLogado.profile,
+      phone: this.usuarioLogado.phone,
+      ativo: "sim",
+      password: userData.password,
+      healthUnit: selectedUnit ? {
+        name: selectedUnit.name,
+        cnpj: selectedUnit.cnpj,
+        phone: selectedUnit.phone || "",
+        email: selectedUnit.email || "",
+        address: {
+          streetName: selectedUnit.address?.streetName || "",
+          streetNumber: selectedUnit.address?.streetNumber || "",
+          complement: selectedUnit.address?.complement || "",
+          city: selectedUnit.address?.city || "",
+          state: selectedUnit.address?.state || "",
+          zipCode: selectedUnit.address?.zipCode || "",
+          neighborhood: selectedUnit.address?.bairro || selectedUnit.address?.neighborhood || ""
+        }
+      } : null
+    };
+
+        this.usuariosService.atualizarUsuario(this.idUsuario!, payload).subscribe({
+        next: (res) => {
+          alert('Alterações salvas com sucesso!');
+        }
+      })
   }
 
   logout(): void {
@@ -131,6 +195,11 @@ export default class ProfileComponent implements OnInit {
       this.formErrorMessage.set('CPF inválido');
       return;
     }
+
+    if (controls['password'].errors?.['invalidPassword']) {
+      this.formErrorMessage.set('Confirme sua senha ou insira uma senha nova');
+      return;
+    }
   }
 
   pastDateValidator(control: AbstractControl): ValidationErrors | null {
@@ -144,5 +213,11 @@ export default class ProfileComponent implements OnInit {
     if (!control.value) return null;
     const cpfRegex = /^\d{3}\.\d{3}\.\d{3}\-\d{2}$|^\d{11}$/;
     return cpfRegex.test(control.value) ? null : { invalidCpf: true };
+  }
+
+  passwordValidator(control: AbstractControl): ValidationErrors | null {
+    if (!control.value) return null;
+    const passRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\W]{8,}$/;
+    return passRegex.test(control.value) ? null : { weakPassword: true };
   }
 }

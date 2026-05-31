@@ -24,7 +24,8 @@
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">Data Inicial *</label>
           <input 
             type="date" 
-            [(ngModel)]="dataInicial"
+            [ngModel]="dataInicial()"
+            (ngModelChange)="dataInicial.set($event)"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gray-400 focus:bg-white transition-colors">
         </div>
 
@@ -32,23 +33,40 @@
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">Data Final *</label>
           <input 
             type="date" 
-            [(ngModel)]="dataFinal"
+            [ngModel]="dataFinal()"
+            (ngModelChange)="dataFinal.set($event)"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gray-400 focus:bg-white transition-colors">
         </div>
 
-        <div>
+        <div class="relative">
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">Nome do Idoso</label>
           <input 
             type="text" 
-            [(ngModel)]="nomeIdoso"
+            [ngModel]="nomeIdoso()"
+            (ngModelChange)="nomeIdoso.set($event); mostrarDropdown.set(true)"
+            (focus)="mostrarDropdown.set(true)"
+            (blur)="esconderDropdownTimeout()"
             placeholder="Digite o nome do paciente"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gray-400 focus:bg-white transition-colors">
+            
+          @if (pacientesFiltrados().length > 0) {
+            <ul class="absolute z-10 w-full bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto mt-1">
+              @for (paciente of pacientesFiltrados(); track paciente.id) {
+                <li 
+                  (click)="selecionarPaciente(paciente.name)"
+                  class="px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm text-gray-700 transition-colors">
+                  {{ paciente.name }}
+                </li>
+              }
+            </ul>
+          }
         </div>
 
         <div>
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">Unidade de Saúde</label>
           <select 
-            [(ngModel)]="unidadeSaude"
+            [ngModel]="unidadeSaude()"
+            (ngModelChange)="unidadeSaude.set($event)"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gray-400 focus:bg-white transition-colors appearance-none cursor-pointer">
             <option value="">Selecione a unidade</option>
             @for (unidade of unidadesDisponiveis(); track unidade) {
@@ -61,7 +79,8 @@
           <label class="block text-sm font-semibold text-gray-700 mb-1.5">Idade</label>
           <input 
             type="number" 
-            [(ngModel)]="idade"
+            [ngModel]="idade()"
+            (ngModelChange)="idade.set($event)"
             placeholder="Ex: 65"
             class="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm outline-none focus:border-gray-400 focus:bg-white transition-colors">
         </div>

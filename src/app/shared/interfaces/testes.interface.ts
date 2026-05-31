@@ -9,19 +9,25 @@ export interface CicloTeste {
 }
 
 export interface DetalheTeste {
-  total_repeticoes: number;
-  repeticoes_completas: number;
-  percentual_completas: number;
-  altura_media: number;
-  cadencia: number;
-  amplitude_maxima_oscilacao: number;
-  tempo_total_execucao: number;
-  desvio_padrao_aceleracoes: number;
-  velocidade_media_oscilacao: number;
+  total_repeticoes?: number;
+  repeticoes_completas?: number;
+  percentual_completas?: number;
+  altura_media?: number;
+  cadencia?: number;
+  n_peaks?: number;
+  cadence_cycles_min?: number;
+  vel_mean_deg_s?: number;
+  amplitude_maxima_oscilacao?: number;
+  tempo_total_execucao?: number;
+  desvio_padrao_aceleracoes?: number;
+  velocidade_media_oscilacao?: number;
   indice_estabilidade: number | null;
   classificacao: string | null;
-  cycles: CicloTeste[];
-  t_s: number[]; // Time series
+  cycles?: CicloTeste[];
+  t_s?: number[]; 
+  signal_deg_s?: number[];
+  peaks_t_s?: number[];
+  peaks_value_deg_s?: number[];
 }
 
 export interface TesteDetalhe {
