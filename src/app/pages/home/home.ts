@@ -32,6 +32,9 @@ export default class HomeComponent implements OnInit {
   filtrosAtivos = signal(['Região']);
   distribuicao = signal<{label: string, valor: number, percent: number}[]>([]);
 
+  filtroClassificacao = signal('UTT');
+  todosTestesCadastrados = signal<any[]>([]);
+
   pontosGraficoLinha = signal('0,150 200,80 400,120 600,40 800,100 1000,20');
   dadosGraficoLinha = signal<{x: number, y: number, percentX: number, valor: number, label: string}[]>([]);
 
@@ -95,9 +98,10 @@ export default class HomeComponent implements OnInit {
               cpf: p.cpf,
               unidadeSaude: p.healthUnit?.name || 'Não informada',
               quantidadeTestes: testes ? testes.length : 0,
-              datasTestes: testes ? testes.map((t: any) => t.createdAt || t.testDateTime || t.dataHora) : []
+              datasTestes: testes ? testes.map((t: any) => t.createdAt || t.testDateTime || t.dataHora) : [],
+              listaTestes: testes || []
             })),
-            catchError(() => of({ nome: p.name, cpf: p.cpf, unidadeSaude: p.healthUnit?.name || 'Não informada', quantidadeTestes: 0, datasTestes: [] }))
+            catchError(() => of({ nome: p.name, cpf: p.cpf, unidadeSaude: p.healthUnit?.name || 'Não informada', quantidadeTestes: 0, datasTestes: [], listaTestes: [] }))
           )
         );
         return forkJoin(requisicoes);
@@ -159,7 +163,63 @@ export default class HomeComponent implements OnInit {
 
       this.pontosGraficoLinha.set(dadosLinha.map(d => `${d.x},${d.y}`).join(' '));
       this.dadosGraficoLinha.set(dadosLinha);
+
+      this.todosTestesCadastrados.set(resultado.flatMap(r => r.listaTestes));
+      this.calcularClassificacao();
     });
+  }
+
+  calcularClassificacao() {
+    const testes = this.todosTestesCadastrados();
+    const filtro = this.filtroClassificacao();
+
+    let somaUtt = 0, countUtt = 0;
+    let somaMarcha = 0, countMarcha = 0;
+
+    testes.forEach((t: any) => {
+      const reps = t.totalRepetitionsApp || 0;
+      if (t.testType === 'UTT') {
+        somaUtt += reps;
+        countUtt++;
+      } else if (t.testType === 'MARCHA') {
+        somaMarcha += reps;
+        countMarcha++;
+      }
+    });
+
+    const mediaUtt = countUtt > 0 ? somaUtt / countUtt : 0;
+    const mediaMarcha = countMarcha > 0 ? somaMarcha / countMarcha : 0;
+
+    let acima = 0, media = 0, abaixo = 0;
+
+    testes.forEach((t: any) => {
+      if (filtro !== 'Todos' && t.testType !== filtro) return;
+
+      const reps = t.totalRepetitionsApp || 0;
+      const mediaReferencia = t.testType === 'UTT' ? mediaUtt : (t.testType === 'MARCHA' ? mediaMarcha : 0);
+
+      if (mediaReferencia === 0) return;
+
+      if (reps > mediaReferencia * 1.1) { acima++; } 
+      else if (reps < mediaReferencia * 0.9) { abaixo++; } 
+      else { media++; }
+    });
+
+    const totalClassificados = acima + media + abaixo;
+    if (totalClassificados > 0) {
+      this.classificacao.set({
+        acima: Number(((acima / totalClassificados) * 100).toFixed(1)),
+        media: Number(((media / totalClassificados) * 100).toFixed(1)),
+        abaixo: Number(((abaixo / totalClassificados) * 100).toFixed(1))
+      });
+    } else {
+      this.classificacao.set({ acima: 0, media: 0, abaixo: 0 });
+    }
+  }
+
+  mudarFiltroClassificacao(filtro: string) {
+    this.filtroClassificacao.set(filtro);
+    this.calcularClassificacao();
   }
 
   alternarFiltro(filtro: string) {
