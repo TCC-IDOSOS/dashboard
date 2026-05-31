@@ -116,18 +116,32 @@ export default class GerarRelatorio implements OnInit {
 
               const requisicoesDetalhes = testesNoPeriodo.map(teste =>
                 this.testesService.buscarTesteUsuario(usuario.email, teste.id).pipe(
-                  map(detalhe => ({
-                    nomePaciente: usuario.name,
-                    idade: this.calcularIdade(usuario.birthDate, teste.createdAt),
-                    sexo: usuario.genre,
-                    tipoTeste: teste.testType === 'MARCHA' ? 'Marcha Estacionária' : teste.testType,
-                    dataHora: this.formatarDataParaRelatorio(teste.createdAt),
-                    unidadeSaude: usuario.healthUnit.name || 'Não informada',
-                    repeticoes: detalhe.repeticoes_completas ?? detalhe.n_peaks ?? (detalhe.peaks_t_s ? detalhe.peaks_t_s.length : 0),
-                    alturaMedia: Number(detalhe.altura_media ?? detalhe.vel_mean_deg_s ?? 0).toFixed(2),
-                    cadencia: Number(detalhe.cadencia ?? detalhe.cadence_cycles_min ?? 0).toFixed(2),
-                    classificacao: detalhe.classificacao || 'Não Avaliado'
-                  })),
+                  map(detalhe => {
+                    let mediaZ = 0;
+                    if (teste.testType === 'MARCHA') {
+                      let peaksZ: number[] = [];
+                      if (detalhe.cycles && detalhe.cycles.length > 0) {
+                        peaksZ = detalhe.cycles.map((c: any) => c.w_phoneZ_peak_deg_s ?? 0);
+                      } else {
+                        const pValues = typeof detalhe.peaks_value_deg_s === 'string' ? JSON.parse(detalhe.peaks_value_deg_s || '[]') : (detalhe.peaks_value_deg_s || []);
+                        peaksZ = pValues;
+                      }
+                      mediaZ = peaksZ.length > 0 ? peaksZ.reduce((a: number, b: number) => a + Math.abs(b), 0) / peaksZ.length : 0;
+                    }
+
+                    return {
+                      nomePaciente: usuario.name,
+                      idade: this.calcularIdade(usuario.birthDate, teste.createdAt),
+                      sexo: usuario.genre,
+                      tipoTeste: teste.testType === 'MARCHA' ? 'Marcha Estacionária' : teste.testType,
+                      dataHora: this.formatarDataParaRelatorio(teste.createdAt),
+                      unidadeSaude: usuario.healthUnit.name || 'Não informada',
+                      repeticoes: detalhe.repeticoes_completas ?? detalhe.n_peaks ?? (detalhe.peaks_t_s ? detalhe.peaks_t_s.length : 0),
+                      alturaMedia: teste.testType === 'MARCHA' ? Number(mediaZ).toFixed(2) : Number(detalhe.altura_media ?? 0).toFixed(2),
+                      cadencia: Number(detalhe.cadencia ?? detalhe.cadence_cycles_min ?? 0).toFixed(2),
+                      classificacao: detalhe.classificacao || 'Não Avaliado'
+                    };
+                  }),
                   catchError(() => of(null))
                 )
               );

@@ -45,8 +45,6 @@ export default class TestesListComponent implements OnInit {
             const email = params['email'] || '';
             const userId = params['id'];
 
-            console.warn('Parâmetros de consulta recebidos:', usuarioLogado);
-
             if (usuarioLogado.profile === 'Paciente') {
               return of([usuarioLogado]);
             } else {
@@ -77,12 +75,14 @@ export default class TestesListComponent implements OnInit {
                       const pTimes = typeof detalhe.peaks_t_s === 'string' ? JSON.parse(detalhe.peaks_t_s || '[]') : (detalhe.peaks_t_s || []);
 
                       let ciclosMapeados: any[] = [];
+
+                      console.warn(teste)
                       
                       if (teste.testType === 'MARCHA') {
                         if (detalhe.cycles && detalhe.cycles.length > 0) {
                           ciclosMapeados = detalhe.cycles.map((c: any, i: number) => ({
                             ciclo: c.peak_idx ?? (i + 1),
-                            amplitude_cm: c.w_pred_deg_s ?? 0, 
+                            amplitude_cm: c.w_phoneZ_peak_deg_s ?? 0, 
                             tempo_ciclo_s: c.t_peak_s ?? 0,
                             velocidade_subida_cm_s: 0,
                             tempo_subida_s: 0,
@@ -103,9 +103,14 @@ export default class TestesListComponent implements OnInit {
                       } else {
                         ciclosMapeados = detalhe.cycles || [];
                       }
-
-                      console.warn(`[API] Detalhes originais do Teste ${teste.id}:`, detalhe);
+                      if(teste.id == 27) {
+                        console.warn(`[API] Detalhes originais do Teste ${teste.id}:`, detalhe);
                       console.warn(`[MAPEADO] Ciclos gerados do Teste ${teste.id}:`, ciclosMapeados);
+                      }
+
+                      const mediaZ = ciclosMapeados.length > 0 
+                        ? ciclosMapeados.reduce((acc: number, c: any) => acc + Math.abs(c.amplitude_cm || 0), 0) / ciclosMapeados.length 
+                        : 0;
 
                       return {
                       id: teste.id,
@@ -122,7 +127,7 @@ export default class TestesListComponent implements OnInit {
                       unidade: usuario.healthUnit?.name || 'Não informada',
 
                       repeticoes: detalhe.repeticoes_completas ?? detalhe.n_peaks ?? (detalhe.peaks_t_s ? detalhe.peaks_t_s.length : 0),
-                      alturaMedia: Number(detalhe.altura_media ?? detalhe.vel_mean_deg_s ?? 0).toFixed(2),
+                      alturaMedia: teste.testType === 'MARCHA' ? Number(mediaZ).toFixed(2) : Number(detalhe.altura_media ?? 0).toFixed(2),
                       cadencia: Number(detalhe.cadencia ?? detalhe.cadence_cycles_min ?? 0).toFixed(2),
                       classificacao: detalhe.classificacao || 'Não Avaliado',
                         cycles: ciclosMapeados,
