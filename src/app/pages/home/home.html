@@ -29,11 +29,7 @@
             </div>
             <span class="text-gray-500 text-sm font-medium">Testes no Período</span>
           </div>
-          <select class="text-sm bg-gray-100 border-none rounded-md px-2 py-1 outline-none text-gray-600 cursor-pointer">
-            <option>Últimos 3 meses</option>
-            <option>Este Mês</option>
-            <option>Últimos 6 Meses</option>
-          </select>
+          <span class="text-xs bg-gray-100 text-gray-600 font-medium px-2.5 py-1 rounded-md">Últimos 30 dias</span>
         </div>
         <div class="text-5xl font-light text-gray-900">{{ testesNoPeriodo() }}</div>
       </div>
@@ -71,65 +67,80 @@
           <h2 class="text-lg text-gray-800">Total por Tipo de Teste</h2>
         </div>
         
-        <div class="flex-1 flex items-end justify-center space-x-12 border-b border-l border-gray-300 relative pb-2 pl-4">
-          <div class="absolute -left-8 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 py-2">
-            <span>320</span><span>240</span><span>160</span><span>80</span><span>0</span>
-          </div>
+        <div class="flex-1 flex items-end justify-center space-x-12 border-b border-gray-300 relative mb-6">
           
           @for (item of totalPorTipo(); track item.label) {
-            <div class="flex flex-col items-center w-24">
-              <div class="w-full bg-[#93A5F5] transition-all duration-500 hover:bg-[#7b8ee4]" [style.height.%]="item.percent"></div>
-              <span class="text-xs text-gray-600 mt-3 font-medium">{{ item.label }}</span>
+            <div class="flex flex-col justify-end items-center w-24 h-full relative group">
+              <div class="w-full flex-1 flex items-end justify-center">
+                <div class="w-full bg-[#93A5F5] transition-all duration-500 hover:bg-[#7b8ee4] rounded-t-sm min-h-[20px] flex items-center justify-center" [style.height.%]="item.percent">
+                  <span class="text-sm font-bold text-gray-800">{{ item.valor }}</span>
+                </div>
+              </div>
+              <span class="absolute top-full pt-2 text-xs text-gray-600 font-medium text-center w-full">{{ item.label }}</span>
             </div>
           }
         </div>
       </div>
 
       <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm h-80 flex flex-col">
-        <div class="flex items-center space-x-2 mb-4">
-          <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
-          <h2 class="text-lg text-gray-800">Distribuição de Testes</h2>
-        </div>
-
-        <div class="flex flex-wrap gap-2 mb-6">
-          @for (filtro of ['Região', 'Cidade', 'Bairro', 'Faixa Etária', 'Sexo']; track filtro) {
-            <button 
-              (click)="alternarFiltro(filtro)"
-              class="px-3 py-1 text-xs rounded-full transition-colors border"
-              [ngClass]="filtrosAtivos().includes(filtro) ? 'bg-white border-gray-800 text-gray-800' : 'bg-gray-200 border-transparent text-gray-600 hover:bg-gray-300'">
-              {{ filtro }}
-            </button>
-          }
-        </div>
+        <h2 class="text-lg text-gray-800 mb-6">Testes por mês</h2>
         
-        <div class="flex-1 flex items-end justify-around border-b border-l border-gray-300 relative pb-2 pl-4">
-          <div class="absolute -left-8 top-0 bottom-0 flex flex-col justify-between text-xs text-gray-500 py-2">
-            <span>320</span><span>240</span><span>160</span><span>80</span><span>0</span>
-          </div>
-          
-          @for (item of distribuicao(); track item.label) {
-            <div class="flex flex-col items-center w-16">
-              <div class="w-full bg-[#8EF898] transition-all duration-500 hover:bg-[#72e87d]" [style.height.%]="item.percent"></div>
-              <span class="text-xs text-gray-600 mt-3 font-medium">{{ item.label }}</span>
-            </div>
-          }
+        <div class="w-full flex-1 relative border-b border-gray-300 mb-6 mt-2">
+           <svg class="absolute inset-0 w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 200">
+              <polyline 
+                fill="none" 
+                stroke="#374151" 
+                stroke-width="2" 
+                vector-effect="non-scaling-stroke"
+                [attr.points]="pontosGraficoLinha()" />
+           </svg>
+
+           @for (ponto of dadosGraficoLinha(); track ponto.label) {
+             <div class="absolute w-6 h-6 -ml-3 -mt-3 flex flex-col items-center justify-center z-10"
+                  [style.left.%]="ponto.percentX"
+                  [style.top.%]="(ponto.y / 200) * 100">
+               <span class="absolute -top-6 text-sm font-bold text-gray-800">{{ ponto.valor }}</span>
+               <div class="w-2.5 h-2.5 bg-gray-800 rounded-full border-2 border-white shadow-sm hover:scale-150 transition-transform cursor-pointer"></div>
+             </div>
+             <span class="absolute top-full pt-2 text-xs text-gray-600 font-medium text-center w-12 -ml-6"
+                   [style.left.%]="ponto.percentX">
+               {{ ponto.label }}
+             </span>
+           }
         </div>
       </div>
 
     </div>
 
-    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm">
-      <h2 class="text-lg text-gray-800 mb-6">Testes por mês</h2>
+    <div class="bg-white p-6 rounded-xl border border-gray-200 shadow-sm h-80 flex flex-col">
+      <div class="flex items-center space-x-2 mb-4">
+        <svg class="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path></svg>
+        <h2 class="text-lg text-gray-800">Distribuição de Testes</h2>
+      </div>
+
+      <div class="flex flex-wrap gap-2 mb-6">
+        @for (filtro of ['Região']; track filtro) {
+          <button 
+            (click)="alternarFiltro(filtro)"
+            class="px-3 py-1 text-xs rounded-full transition-colors border"
+            [ngClass]="filtrosAtivos().includes(filtro) ? 'bg-white border-gray-800 text-gray-800' : 'bg-gray-200 border-transparent text-gray-600 hover:bg-gray-300'">
+            {{ filtro }}
+          </button>
+        }
+      </div>
       
-      <div class="w-full h-48 relative border-b border-l border-gray-300">
-         <svg class="w-full h-full overflow-visible" preserveAspectRatio="none" viewBox="0 0 1000 200">
-            <polyline 
-              fill="none" 
-              stroke="#374151" 
-              stroke-width="2" 
-              vector-effect="non-scaling-stroke"
-              [attr.points]="pontosGraficoLinha()" />
-         </svg>
+      <div class="flex-1 flex items-end justify-around border-b border-gray-300 relative mb-8 mt-2">
+        
+        @for (item of distribuicao(); track item.label) {
+          <div class="flex flex-col justify-end items-center w-16 h-full relative group">
+            <div class="w-full flex-1 flex items-end justify-center">
+              <div class="w-full bg-[#8EF898] transition-all duration-500 hover:bg-[#72e87d] rounded-t-sm min-h-[20px] flex items-center justify-center" [style.height.%]="item.percent">
+                <span class="text-xs font-bold text-gray-800">{{ item.valor }}</span>
+              </div>
+            </div>
+            <span class="absolute top-full pt-2 text-xs text-gray-600 font-medium text-center leading-tight w-24 left-1/2 -translate-x-1/2">{{ item.label }}</span>
+          </div>
+        }
       </div>
     </div>
 

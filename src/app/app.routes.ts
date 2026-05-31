@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/login.guard';
 
 export const routes: Routes = [
+  { path: "", redirectTo: "login", pathMatch: "full" },
   { path: "login", loadComponent: () => import("./pages/login/login")},
     {
       path: '',
@@ -15,6 +16,6 @@ export const routes: Routes = [
           { path: "gerar-relatorio", loadComponent: () => import("./pages/gerar-relatorio/gerar-relatorio") },
         ]
     },
-    { path: "", redirectTo: "login", pathMatch: "full" },
-    { path: "**", redirectTo: "login" }
+    { path: "**", redirectTo: "login" },
+    
 ];

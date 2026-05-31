@@ -45,11 +45,11 @@ export default class TestesListComponent implements OnInit {
             const email = params['email'] || '';
             const userId = params['id'];
 
+            console.warn('Parâmetros de consulta recebidos:', usuarioLogado);
+
             if (usuarioLogado.profile === 'Paciente') {
-              // Se for paciente, injeta ele mesmo como o único alvo da busca de testes
               return of([usuarioLogado]);
             } else {
-              // Se for profissional/admin, segue o fluxo normal (queryParams ou todos)
               return (email && userId)
                 ? this.usuarioService.buscarUsuarioPorId(userId).pipe(map(u => [u]))
                 : this.usuarioService.listarPacientes();
@@ -71,22 +71,61 @@ export default class TestesListComponent implements OnInit {
 
                 const requisicoesDetalhes = listaTestes.map(teste => 
                   this.testesService.buscarTesteUsuario(usuario.email, teste.id).pipe(
-                    map(detalhe => ({
+                    map(detalhe => {
+                      
+                      const pValues = typeof detalhe.peaks_value_deg_s === 'string' ? JSON.parse(detalhe.peaks_value_deg_s || '[]') : (detalhe.peaks_value_deg_s || []);
+                      const pTimes = typeof detalhe.peaks_t_s === 'string' ? JSON.parse(detalhe.peaks_t_s || '[]') : (detalhe.peaks_t_s || []);
+
+                      let ciclosMapeados: any[] = [];
+                      
+                      if (teste.testType === 'MARCHA') {
+                        if (detalhe.cycles && detalhe.cycles.length > 0) {
+                          ciclosMapeados = detalhe.cycles.map((c: any, i: number) => ({
+                            ciclo: c.peak_idx ?? (i + 1),
+                            amplitude_cm: c.w_pred_deg_s ?? 0, 
+                            tempo_ciclo_s: c.t_peak_s ?? 0,
+                            velocidade_subida_cm_s: 0,
+                            tempo_subida_s: 0,
+                            potencia_w: 0,
+                            trabalho_j: 0
+                          }));
+                        } else {
+                          ciclosMapeados = pValues.map((val: number, i: number) => ({
+                            ciclo: i + 1,
+                            amplitude_cm: val,
+                            tempo_ciclo_s: pTimes[i] || 0,
+                            velocidade_subida_cm_s: 0,
+                            tempo_subida_s: 0,
+                            potencia_w: 0,
+                            trabalho_j: 0
+                          }));
+                        }
+                      } else {
+                        ciclosMapeados = detalhe.cycles || [];
+                      }
+
+                      console.warn(`[API] Detalhes originais do Teste ${teste.id}:`, detalhe);
+                      console.warn(`[MAPEADO] Ciclos gerados do Teste ${teste.id}:`, ciclosMapeados);
+
+                      return {
                       id: teste.id,
                       nomeTeste: teste.testType === 'MARCHA' ? 'Marcha Estacionária' : teste.testType,
+                      testType: teste.testType,
                       dataHora: this.formatarData(teste.createdAt),
                       dataOriginal: teste.createdAt,
                       
                       paciente: usuario.name, 
                       cpf: this.formatarCpf(usuario.cpf),
+                      idade: this.calcularIdade(usuario.birthDate, teste.createdAt),
+                      quedas: (usuario as any).qtdQuedas || 0,
                       profissional: 'Avaliador', 
                       unidade: usuario.healthUnit?.name || 'Não informada',
 
-                      repeticoes: detalhe.repeticoes_completas || 0,
-                      alturaMedia: Number(detalhe.altura_media || 0).toFixed(2),
-                      cadencia: Number(detalhe.cadencia || 0).toFixed(2),
+                      repeticoes: detalhe.repeticoes_completas ?? detalhe.n_peaks ?? (detalhe.peaks_t_s ? detalhe.peaks_t_s.length : 0),
+                      alturaMedia: Number(detalhe.altura_media ?? detalhe.vel_mean_deg_s ?? 0).toFixed(2),
+                      cadencia: Number(detalhe.cadencia ?? detalhe.cadence_cycles_min ?? 0).toFixed(2),
                       classificacao: detalhe.classificacao || 'Não Avaliado',
-                      cycles: detalhe.cycles || [],
+                        cycles: ciclosMapeados,
 
                       nomeProfissional: 'Avaliador',
                       unidadeSaude: usuario.healthUnit?.name || 'Não informada',
@@ -95,8 +134,12 @@ export default class TestesListComponent implements OnInit {
                         unidade: usuario.healthUnit?.name || 'Não informada',
                         dataHora: teste.createdAt
                       },
-                      metricas: detalhe
-                    })),
+                        metricas: {
+                          ...detalhe,
+                          cycles: ciclosMapeados
+                        }
+                      };
+                    }),
                     catchError(() => of(null)) 
                   )
                 );
@@ -139,6 +182,18 @@ export default class TestesListComponent implements OnInit {
     return numeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
   }
 
+  private calcularIdade(dataNascimento: string | Date, dataTeste: string): number {
+    if (!dataNascimento) return 0;
+    const nascimento = new Date(dataNascimento);
+    const teste = new Date(dataTeste);
+    let idade = teste.getFullYear() - nascimento.getFullYear();
+    const m = teste.getMonth() - nascimento.getMonth();
+    if (m < 0 || (m === 0 && teste.getDate() < nascimento.getDate())) {
+      idade--;
+    }
+    return idade;
+  }
+
   testesFiltrados = computed(() => {
     const termo = this.termoPesquisa().toLowerCase();
     const inicio = this.dataInicioFiltro();
@@ -176,6 +231,8 @@ export default class TestesListComponent implements OnInit {
       ...testeSelecionado,
       dataHora: testeSelecionado.dataOriginal
     };
+
+    console.warn('Dados enviados para o Modal:', dadosModal);
 
     this.modalDetalhe.abrir(dadosModal);
   }

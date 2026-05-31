@@ -50,7 +50,7 @@
   
               <td class="py-4 px-6 text-right space-x-3">
   
-                <button *ngIf="!isPacienteLogado()" (click)="editarUsuario(u)"
+                <button *ngIf="!isPacienteLogado() && u.profile !== 'Admin'" (click)="editarUsuario(u)"
                   class="inline-flex items-center justify-center p-1 text-gray-500 hover:text-gray-900 transition-colors cursor-pointer"
                   title="Editar">
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -61,7 +61,7 @@
                 </button>
   
                 <button *ngIf="u.profile === 'Paciente'" (click)="visualizarTestes(u)"
-                  class="inline-flex items-center justify-center p-1 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
+                  class="inline-flex items-center justify-cent er p-1 text-gray-500 hover:text-blue-600 transition-colors cursor-pointer"
                   title="Ver Testes">
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -72,7 +72,7 @@
                   </svg>
                 </button>
   
-                <button *ngIf="!isPacienteLogado()" (click)="excluirUsuario(u)"
+                <button *ngIf="!isPacienteLogado() && u.profile !== 'Admin'" (click)="excluirUsuario(u)"
                   class="inline-flex items-center justify-center p-1 text-gray-500 hover:text-red-600 transition-colors cursor-pointer"
                   title="Excluir">
                   <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
