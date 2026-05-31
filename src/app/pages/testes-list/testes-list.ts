@@ -266,8 +266,6 @@ export default class TestesListComponent implements OnInit {
       dataHora: testeSelecionado.dataOriginal
     };
 
-    console.warn('Dados enviados para o Modal:', dadosModal);
-
     this.modalDetalhe.abrir(dadosModal);
   }
 

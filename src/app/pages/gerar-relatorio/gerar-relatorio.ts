@@ -30,7 +30,6 @@ export default class GerarRelatorio implements OnInit {
   isLoading = signal(false);
 
   unidadesDisponiveis = signal<string[]>([]);
-  regioesDisponiveis = signal(['Centro', 'Norte', 'Sul', 'Leste', 'Oeste']);
 
   pacientes = signal<any[]>([]);
   mostrarDropdown = signal(false);

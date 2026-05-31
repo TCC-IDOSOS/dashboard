@@ -12,19 +12,15 @@ export class ResultadoTesteComponent {
   exibir = signal(false);
   dados = signal<any>(null);
   maxRef = signal<number>(100);
-
-  limiteRepeticaoCompleta = 0.7;
+  maiorValor = signal<number>(100);
 
   abrir(dadosRecebidos: any) {
     this.dados.set(dadosRecebidos);
-    
-    if (dadosRecebidos?.testType === 'MARCHA') {
-      const amplitudes = (dadosRecebidos.cycles || []).map((c: any) => c.amplitude_cm || c || 0);
-      const max = Math.max(...amplitudes, 1);
-      this.maxRef.set(max * 1.2); 
-    } else {
-      this.maxRef.set(100); 
-    }
+
+    const amplitudes = (dadosRecebidos?.cycles || []).map((c: any) => c.amplitude_cm || c || 0);
+    this.maiorValor.set(Math.max(...amplitudes, 1));
+
+    this.maxRef.set(100); 
 
     this.exibir.set(true);
     document.body.style.overflow = 'hidden';
@@ -36,7 +32,7 @@ export class ResultadoTesteComponent {
   }
 
   calcularAlturaBarra(valor: number): string {
-    const max = this.maxRef();
+    const max = this.maiorValor();
     const altura = Math.min((valor / max) * 100, 100); 
     return `${altura}%`;
   }

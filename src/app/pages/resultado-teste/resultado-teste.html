@@ -95,13 +95,6 @@
             </div>
           </div>
 
-          <div class="absolute w-full border-t-2 border-red-500 border-dashed z-10"
-               [style.bottom.%]="limiteRepeticaoCompleta * 100">
-            <span class="absolute right-0 -top-6 text-[10px] font-bold text-red-500 uppercase tracking-tighter">
-              Limite Repetição Completa
-            </span>
-          </div>
-
           <div class="absolute inset-0 flex items-end justify-around px-2">
             @for (ciclo of dados()?.cycles || [0.5, 0.8, 0.4, 0.9, 0.7]; track $index) {
               <div class="w-full mx-1 bg-blue-500 rounded-t-sm hover:bg-blue-600 transition-all relative group"
