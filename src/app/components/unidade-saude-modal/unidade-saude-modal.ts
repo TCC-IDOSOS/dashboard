@@ -88,7 +88,7 @@ export class UnidadeSaudeModalComponent implements OnInit {
       const isEdicao = !!this.unidade();
 
       const payload: UnidadeSaude = {
-        id: this.criarEditarUnidadeSaude() === Operacao.EDITAR ? this.unidade()!.id : this.unidadeSaudeService.idUnidade,
+        id: isEdicao ? this.unidade()!.id : this.unidadeSaudeService.idUnidade,
         name: formData.name,
         cnpj: formData.cnpj,
         phone: formData.phone,
@@ -104,7 +104,7 @@ export class UnidadeSaudeModalComponent implements OnInit {
         },
       }
 
-      if(this.criarEditarUnidadeSaude() === Operacao.CRIAR) {
+      if(!isEdicao) {
         this.unidadeSaudeService.criarUnidadeSaude(payload).subscribe({
           next: (res) => {
             alert('Unidade cadastrada com sucesso!');
