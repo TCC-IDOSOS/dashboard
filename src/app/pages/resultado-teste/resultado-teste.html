@@ -62,7 +62,12 @@
           </div>
           <div class="bg-gray-50 border border-gray-100 p-6 rounded text-center">
             <p class="text-gray-400 text-xs font-bold uppercase mb-2">Classificação</p>
-            <p class="text-2xl font-black text-green-600 leading-tight">{{ dados()?.classificacao }}</p>
+            <p class="text-2xl font-black leading-tight"
+               [ngClass]="{
+                 'text-green-600': dados()?.classificacao === 'Acima da Média',
+                 'text-yellow-500': dados()?.classificacao === 'Na Média',
+                 'text-red-600': dados()?.classificacao === 'Abaixo da Média'
+               }">{{ dados()?.classificacao }}</p>
           </div>
         </div>
       </div>
@@ -74,16 +79,16 @@
           
           <div class="absolute inset-0 flex flex-col justify-between pointer-events-none">
             <div class="border-t border-gray-100 w-full relative">
-              <span class="absolute -left-10 -top-2 text-xs text-gray-400">1</span>
+              <span class="absolute -left-10 -top-2 text-xs text-gray-400">{{ maxRef() | number:'1.0-0' }}</span>
             </div>
             <div class="border-t border-gray-100 w-full relative">
-              <span class="absolute -left-10 -top-2 text-xs text-gray-400">0.75</span>
+              <span class="absolute -left-10 -top-2 text-xs text-gray-400">{{ (maxRef() * 0.75) | number:'1.0-0' }}</span>
             </div>
             <div class="border-t border-gray-100 w-full relative">
-              <span class="absolute -left-10 -top-2 text-xs text-gray-400">0.50</span>
+              <span class="absolute -left-10 -top-2 text-xs text-gray-400">{{ (maxRef() * 0.50) | number:'1.0-0' }}</span>
             </div>
             <div class="border-t border-gray-100 w-full relative">
-              <span class="absolute -left-10 -top-2 text-xs text-gray-400">0.25</span>
+              <span class="absolute -left-10 -top-2 text-xs text-gray-400">{{ (maxRef() * 0.25) | number:'1.0-0' }}</span>
             </div>
             <div class="relative">
               <span class="absolute -left-10 -top-2 text-xs text-gray-400">0</span>
@@ -103,7 +108,7 @@
                    [style.height]="calcularAlturaBarra(ciclo.amplitude_cm || ciclo)">
                 
                 <div class="opacity-0 group-hover:opacity-100 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-20 transition-opacity">
-                  Altura12123: {{ ciclo.amplitude_cm || ciclo }}
+                  Valor: {{ (ciclo.amplitude_cm || ciclo) | number:'1.0-1' }}
                 </div>
               </div>
             }

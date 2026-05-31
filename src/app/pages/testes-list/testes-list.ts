@@ -156,6 +156,40 @@ export default class TestesListComponent implements OnInit {
         next: (dadosCompletos: any[]) => {
           const testesValidos = dadosCompletos.flat().filter(d => d !== null);
           
+          let somaUtt = 0, countUtt = 0;
+          let somaMarcha = 0, countMarcha = 0;
+
+          testesValidos.forEach(t => {
+            const reps = t.repeticoes || 0;
+            if (t.testType === 'UTT') {
+              somaUtt += reps;
+              countUtt++;
+            } else if (t.testType === 'MARCHA') {
+              somaMarcha += reps;
+              countMarcha++;
+            }
+          });
+
+          const mediaUtt = countUtt > 0 ? somaUtt / countUtt : 0;
+          const mediaMarcha = countMarcha > 0 ? somaMarcha / countMarcha : 0;
+
+          testesValidos.forEach(t => {
+            const reps = t.repeticoes || 0;
+            const mediaReferencia = t.testType === 'UTT' ? mediaUtt : (t.testType === 'MARCHA' ? mediaMarcha : 0);
+
+            if (mediaReferencia > 0) {
+              if (reps > mediaReferencia * 1.1) {
+                t.classificacao = 'Acima da Média';
+              } else if (reps < mediaReferencia * 0.9) {
+                t.classificacao = 'Abaixo da Média';
+              } else {
+                t.classificacao = 'Na Média';
+              }
+            }
+            
+            if (t.metricas) { t.metricas.classificacao = t.classificacao; }
+          });
+
           testesValidos.sort((a, b) => new Date(b.dataOriginal).getTime() - new Date(a.dataOriginal).getTime());
 
           this.testes.set(testesValidos);

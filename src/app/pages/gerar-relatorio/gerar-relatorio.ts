@@ -143,6 +143,38 @@ export default class GerarRelatorio implements OnInit {
       next: (dadosAninhados: any[][]) => {
         let dadosFinais = dadosAninhados.flat().filter(d => d !== null);
 
+        let somaUtt = 0, countUtt = 0;
+        let somaMarcha = 0, countMarcha = 0;
+
+        dadosFinais.forEach(t => {
+          const reps = t.repeticoes || 0;
+          if (t.tipoTeste === 'UTT') {
+            somaUtt += reps;
+            countUtt++;
+          } else if (t.tipoTeste === 'Marcha Estacionária') {
+            somaMarcha += reps;
+            countMarcha++;
+          }
+        });
+
+        const mediaUtt = countUtt > 0 ? somaUtt / countUtt : 0;
+        const mediaMarcha = countMarcha > 0 ? somaMarcha / countMarcha : 0;
+
+        dadosFinais.forEach(t => {
+          const reps = t.repeticoes || 0;
+          const mediaReferencia = t.tipoTeste === 'UTT' ? mediaUtt : (t.tipoTeste === 'Marcha Estacionária' ? mediaMarcha : 0);
+
+          if (mediaReferencia > 0) {
+            if (reps > mediaReferencia * 1.1) {
+              t.classificacao = 'Acima da Média';
+            } else if (reps < mediaReferencia * 0.9) {
+              t.classificacao = 'Abaixo da Média';
+            } else {
+              t.classificacao = 'Na Média';
+            }
+          }
+        });
+
         if (dadosFinais.length === 0) {
           alert("Nenhum resultado encontrado para os filtros aplicados.");
         } else {
