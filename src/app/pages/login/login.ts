@@ -42,7 +42,7 @@ export default class Login {
       next: (res) => {
         this.loginService.salvarToken(res.token);
         this.loginService.setIdUsuarioLogado(Number(res.userId));
-        this.router.navigate(['/perfil']);
+        this.router.navigate(['/home']);
       }
     })
 

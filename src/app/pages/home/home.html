@@ -29,7 +29,14 @@
             </div>
             <span class="text-gray-500 text-sm font-medium">Testes no Período</span>
           </div>
-          <span class="text-xs bg-gray-100 text-gray-600 font-medium px-2.5 py-1 rounded-md">Últimos 30 dias</span>
+          <select 
+            [ngModel]="filtroPeriodoTestes()"
+            (ngModelChange)="mudarFiltroPeriodo($event)"
+            class="text-xs bg-gray-100 text-gray-600 font-medium px-2 py-1 rounded-md outline-none border-none cursor-pointer hover:bg-gray-200 transition-colors">
+            @for (opcao of opcoesPeriodo; track opcao) {
+              <option [value]="opcao">{{ opcao }}</option>
+            }
+          </select>
         </div>
         <div class="text-5xl font-light text-gray-900">{{ testesNoPeriodo() }}</div>
       </div>
