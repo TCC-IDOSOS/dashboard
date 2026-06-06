@@ -53,55 +53,67 @@
         </thead>
 
         <tbody class="divide-y divide-gray-200">
-          @for (teste of testesFiltrados(); track teste.id) {
-            <tr class="hover:bg-gray-50 transition-colors">
-              
-              <td class="px-4 py-3">
-                <div class="text-gray-900 font-medium">{{ teste.nomeTeste }}</div>
-                <div class="text-gray-400 text-xs mt-0.5">{{ teste.profissional }}</div>
-              </td>
-
-              <td class="px-4 py-3">
-                <div class="text-gray-900">{{ teste.paciente }}</div>
-                <div class="text-gray-400 text-xs mt-0.5">{{ teste.cpf }}</div>
-              </td>
-
-              <td class="px-4 py-3 text-center text-gray-600">{{ teste.dataHora }}</td>
-              <td class="px-4 py-3 text-center text-gray-600">{{ teste.repeticoes }}</td>
-              <td class="px-4 py-3 text-center text-gray-600">{{ teste.alturaMedia }}</td>
-              <td class="px-4 py-3 text-center text-gray-600">{{ teste.cadencia }}</td>
-
-              <td class="px-4 py-3">
-                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-md"
-                      [ngClass]="{
-                        'bg-green-50 text-green-700': teste.classificacao === 'Acima da Média',
-                        'bg-yellow-50 text-yellow-700': teste.classificacao === 'Na Média',
-                        'bg-red-50 text-red-700': teste.classificacao === 'Abaixo da Média'
-                      }">
-                  {{ teste.classificacao }}
-                </span>
-              </td>
-
-              <td class="px-4 py-3 text-gray-600">{{ teste.unidade }}</td>
-
-              <td class="px-4 py-3 text-center">
-                <button (click)="verDetalhes(teste.id)" class="text-gray-900 hover:text-blue-600 transition-colors" title="Ver detalhes">
-                  <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                </button>
-              </td>
-
-            </tr>
-          }
-
-          @if (testesFiltrados().length === 0) {
+          @if (isLoading()) {
             <tr>
-              <td colspan="9" class="px-4 py-8 text-center text-gray-500">
-                Nenhum teste encontrado para a sua pesquisa.
+              <td colspan="9" class="px-4 py-12 text-center text-gray-500">
+                <svg class="animate-spin inline-block w-6 h-6 text-gray-400 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                <span>Carregando testes...</span>
               </td>
             </tr>
+          } @else {
+            @for (teste of testesFiltrados(); track teste.id) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                
+                <td class="px-4 py-3">
+                  <div class="text-gray-900 font-medium">{{ teste.nomeTeste }}</div>
+                  <div class="text-gray-400 text-xs mt-0.5">{{ teste.profissional }}</div>
+                </td>
+  
+                <td class="px-4 py-3">
+                  <div class="text-gray-900">{{ teste.paciente }}</div>
+                  <div class="text-gray-400 text-xs mt-0.5">{{ teste.cpf }}</div>
+                </td>
+  
+                <td class="px-4 py-3 text-center text-gray-600">{{ teste.dataHora }}</td>
+                <td class="px-4 py-3 text-center text-gray-600">{{ teste.repeticoes }}</td>
+                <td class="px-4 py-3 text-center text-gray-600">{{ teste.alturaMedia }}</td>
+                <td class="px-4 py-3 text-center text-gray-600">{{ teste.cadencia }}</td>
+  
+                <td class="px-4 py-3">
+                  <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-md"
+                        [ngClass]="{
+                          'bg-green-50 text-green-700': teste.classificacao === 'Acima da Média',
+                          'bg-yellow-50 text-yellow-700': teste.classificacao === 'Na Média',
+                          'bg-red-50 text-red-700': teste.classificacao === 'Abaixo da Média'
+                        }">
+                    {{ teste.classificacao }}
+                  </span>
+                </td>
+  
+                <td class="px-4 py-3 text-gray-600">{{ teste.unidade }}</td>
+  
+                <td class="px-4 py-3 text-center">
+                  <button (click)="verDetalhes(teste.id)" class="text-gray-900 hover:text-blue-600 transition-colors" title="Ver detalhes">
+                    <svg class="w-5 h-5 mx-auto" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                    </svg>
+                  </button>
+                </td>
+  
+              </tr>
+            }
+  
+            @if (testesFiltrados().length === 0) {
+              <tr>
+                <td colspan="9" class="px-4 py-8 text-center text-gray-500">
+                  Nenhum teste encontrado para a sua pesquisa.
+                </td>
+              </tr>
+            }
           }
         </tbody>
 
