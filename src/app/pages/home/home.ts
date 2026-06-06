@@ -35,6 +35,9 @@ export default class HomeComponent implements OnInit {
   filtroClassificacao = signal('UTT');
   todosTestesCadastrados = signal<any[]>([]);
 
+  filtroPeriodoTestes = signal('Mês atual');
+  opcoesPeriodo = ['Mês atual', 'Últimos 30 dias', 'Últimos 3 meses', 'Este ano'];
+
   pontosGraficoLinha = signal('0,150 200,80 400,120 600,40 800,100 1000,20');
   dadosGraficoLinha = signal<{x: number, y: number, percentX: number, valor: number, label: string}[]>([]);
 
@@ -49,16 +52,9 @@ export default class HomeComponent implements OnInit {
     this.dashboardService.obterEstatisticas().subscribe({
       next: (stats) => {
         this.totalPacientes.set(stats.totalPatients);
-        this.testesNoPeriodo.set(stats.testsLast30Days);
-        
-        const marcha = stats.testsByType?.MARCHA || 0;
-        const utt = stats.testsByType?.UTT || 0;
-        const maxVal = Math.max(marcha, utt) || 1; 
-
-        this.totalPorTipo.set([
-          { label: '2MST', valor: marcha, percent: Math.round((marcha / maxVal) * 100) },
-          { label: 'UTT', valor: utt, percent: Math.round((utt / maxVal) * 100) }
-        ]);
+        if (this.todosTestesCadastrados().length === 0) {
+          this.testesNoPeriodo.set(stats.testsLast30Days);
+        }
       },
       error: (erro) => {
         console.error("Falha ao buscar estatísticas: ", erro);
@@ -99,7 +95,7 @@ export default class HomeComponent implements OnInit {
               unidadeSaude: p.healthUnit?.name || 'Não informada',
               quantidadeTestes: testes ? testes.length : 0,
               datasTestes: testes ? testes.map((t: any) => t.createdAt || t.testDateTime || t.dataHora) : [],
-              listaTestes: testes || []
+              listaTestes: (testes || []).map((t: any) => ({ ...t, unidadeSaude: p.healthUnit?.name || 'Não informada' }))
             })),
             catchError(() => of({ nome: p.name, cpf: p.cpf, unidadeSaude: p.healthUnit?.name || 'Não informada', quantidadeTestes: 0, datasTestes: [], listaTestes: [] }))
           )
@@ -107,25 +103,6 @@ export default class HomeComponent implements OnInit {
         return forkJoin(requisicoes);
       })
     ).subscribe(resultado => {
-      const agrupadoPorUnidade = resultado.reduce((acc, curr) => {
-        acc[curr.unidadeSaude] = (acc[curr.unidadeSaude] || 0) + curr.quantidadeTestes;
-        return acc;
-      }, {} as Record<string, number>);
-
-      this.distribuicao.update(dist => {
-        const novaDistribuicao = dist.map(d => ({
-          ...d,
-          valor: agrupadoPorUnidade[d.label] || 0
-        }));
-
-        const maxVal = Math.max(...novaDistribuicao.map(d => d.valor)) || 1; 
-
-        return novaDistribuicao.map(d => ({
-          ...d,
-          percent: Math.round((d.valor / maxVal) * 100)
-        }));
-      });
-
       const ultimos6Meses: string[] = [];
       const labels: string[] = [];
       const mesesNomes = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
@@ -166,7 +143,92 @@ export default class HomeComponent implements OnInit {
 
       this.todosTestesCadastrados.set(resultado.flatMap(r => r.listaTestes));
       this.calcularClassificacao();
+      this.calcularTestesNoPeriodo();
+      this.calcularTotalPorTipo();
+      this.calcularDistribuicao();
     });
+  }
+
+  calcularTotalPorTipo() {
+    const testes = this.todosTestesCadastrados();
+    const testesNoPeriodo = this.filtrarTestesPorPeriodo(testes);
+
+    let marcha = 0;
+    let utt = 0;
+
+    testesNoPeriodo.forEach((t: any) => {
+      if (t.testType === 'MARCHA') marcha++;
+      else if (t.testType === 'UTT') utt++;
+    });
+
+    const maxVal = Math.max(marcha, utt, 1); 
+
+    this.totalPorTipo.set([
+      { label: '2MST', valor: marcha, percent: Math.round((marcha / maxVal) * 100) },
+      { label: 'UTT', valor: utt, percent: Math.round((utt / maxVal) * 100) }
+    ]);
+  }
+
+  calcularTestesNoPeriodo() {
+    const testes = this.todosTestesCadastrados();
+    const testesNoPeriodo = this.filtrarTestesPorPeriodo(testes);
+    this.testesNoPeriodo.set(testesNoPeriodo.length);
+  }
+
+  calcularDistribuicao() {
+    const testes = this.todosTestesCadastrados();
+    const testesNoPeriodo = this.filtrarTestesPorPeriodo(testes);
+
+    const agrupadoPorUnidade = testesNoPeriodo.reduce((acc: Record<string, number>, curr: any) => {
+      const unidade = (curr.unidadeSaude || 'Não informada').trim();
+      acc[unidade] = (acc[unidade] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    this.distribuicao.update(dist => {
+      const novaDistribuicao = dist.map(d => ({
+        ...d,
+        valor: agrupadoPorUnidade[d.label.trim()] || 0
+      }));
+
+      const maxVal = Math.max(...novaDistribuicao.map(d => d.valor), 1); 
+
+      return novaDistribuicao.map(d => ({
+        ...d,
+        percent: Math.round((d.valor / maxVal) * 100)
+      }));
+    });
+  }
+
+  filtrarTestesPorPeriodo(testes: any[]): any[] {
+    const filtro = this.filtroPeriodoTestes();
+    const hoje = new Date();
+
+    return testes.filter((t: any) => {
+      const dataTeste = new Date(t.createdAt || t.testDateTime || t.dataHora);
+      if (isNaN(dataTeste.getTime())) return false;
+
+      if (filtro === 'Mês atual') {
+        return dataTeste.getMonth() === hoje.getMonth() && dataTeste.getFullYear() === hoje.getFullYear();
+      } else if (filtro === 'Últimos 30 dias') {
+        const trintaDiasAtras = new Date();
+        trintaDiasAtras.setDate(hoje.getDate() - 30);
+        return dataTeste >= trintaDiasAtras;
+      } else if (filtro === 'Últimos 3 meses') {
+        const tresMesesAtras = new Date(hoje.getFullYear(), hoje.getMonth() - 3, hoje.getDate());
+        return dataTeste >= tresMesesAtras;
+      } else if (filtro === 'Este ano') {
+        return dataTeste.getFullYear() === hoje.getFullYear();
+      }
+      return true;
+    });
+  }
+
+  mudarFiltroPeriodo(filtro: string) {
+    this.filtroPeriodoTestes.set(filtro);
+    this.calcularTestesNoPeriodo();
+    this.calcularTotalPorTipo();
+    this.calcularDistribuicao();
   }
 
   calcularClassificacao() {

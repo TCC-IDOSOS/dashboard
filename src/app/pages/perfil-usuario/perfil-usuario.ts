@@ -54,7 +54,6 @@ export default class ProfileComponent implements OnInit {
       this.usuariosService.buscarUsuarioPorId(this.idUsuario).subscribe({
         next: (user) => {
           this.usuarioLogado = user;
-          console.warn(user)
           this.profileForm.patchValue({
             name: user.name,
             email: user.email,
@@ -66,6 +65,7 @@ export default class ProfileComponent implements OnInit {
             bairro: user.address?.bairro,
             city: user.address?.city,
             state: user.address?.state,
+            phone: user.phone,
             unidadeSaude: user.healthUnit.name,
             password: user.password
           });
@@ -87,6 +87,7 @@ export default class ProfileComponent implements OnInit {
       bairro: ['', Validators.required],
       city: [{ value: '', disabled: true }], 
       state: [{ value: '', disabled: true }], 
+      phone: ['', Validators.required],
       unidadeSaude: ['', Validators.required],
       password: ['', [this.passwordValidator]]
     });
@@ -139,7 +140,7 @@ export default class ProfileComponent implements OnInit {
       id: this.idUsuario,
       genre: this.usuarioLogado.genre,
       profile: this.usuarioLogado.profile,
-      phone: this.usuarioLogado.phone,
+      phone: userData.phone,
       ativo: "sim",
       password: userData.password,
       healthUnit: selectedUnit ? {
