@@ -30,14 +30,19 @@ export default class TestesListComponent implements OnInit {
   modalFiltroAberto = signal(false);
   dataInicioFiltro = signal<string>('');
   dataFimFiltro = signal<string>('');
+  isLoading = signal(true);
 
   @ViewChild('modalDetalhe') modalDetalhe!: ResultadoTesteComponent;
 
   ngOnInit(): void {
     const idUsuarioLogado = this.loginService.getIdUsuarioLogado();
     
-    if (!idUsuarioLogado) return;
+    if (!idUsuarioLogado) {
+      this.isLoading.set(false);
+      return;
+    }
 
+    this.isLoading.set(true);
     this.usuarioService.buscarUsuarioPorId(idUsuarioLogado).pipe(
       switchMap(usuarioLogado => {
         return this.route.queryParams.pipe(
@@ -198,8 +203,12 @@ export default class TestesListComponent implements OnInit {
           testesValidos.sort((a, b) => new Date(b.dataOriginal).getTime() - new Date(a.dataOriginal).getTime());
 
           this.testes.set(testesValidos);
+          this.isLoading.set(false);
         },
-        error: (err) => console.error('Erro ao montar os dados da tabela:', err)
+        error: (err) => {
+          console.error('Erro ao montar os dados da tabela:', err);
+          this.isLoading.set(false);
+        }
       });
   }
 
