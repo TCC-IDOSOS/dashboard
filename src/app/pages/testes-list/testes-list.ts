@@ -80,8 +80,6 @@ export default class TestesListComponent implements OnInit {
                       const pTimes = typeof detalhe.peaks_t_s === 'string' ? JSON.parse(detalhe.peaks_t_s || '[]') : (detalhe.peaks_t_s || []);
 
                       let ciclosMapeados: any[] = [];
-
-                      console.warn(teste)
                       
                       if (teste.testType === 'MARCHA') {
                         if (detalhe.cycles && detalhe.cycles.length > 0) {
@@ -108,11 +106,7 @@ export default class TestesListComponent implements OnInit {
                       } else {
                         ciclosMapeados = detalhe.cycles || [];
                       }
-                      if(teste.id == 27) {
-                        console.warn(`[API] Detalhes originais do Teste ${teste.id}:`, detalhe);
-                      console.warn(`[MAPEADO] Ciclos gerados do Teste ${teste.id}:`, ciclosMapeados);
-                      }
-
+                      
                       const mediaZ = ciclosMapeados.length > 0 
                         ? ciclosMapeados.reduce((acc: number, c: any) => acc + Math.abs(c.amplitude_cm || 0), 0) / ciclosMapeados.length 
                         : 0;

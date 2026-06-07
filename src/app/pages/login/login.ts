@@ -43,11 +43,15 @@ export default class Login {
         this.loginService.salvarToken(res.token);
         this.loginService.setIdUsuarioLogado(Number(res.userId));
         this.router.navigate(['/home']);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        if (err.status === 401) {
+          this.errorMessage.set('E-mail ou senha inválidos');
+        } else {
+          this.errorMessage.set('Ocorreu um erro ao fazer login. Tente novamente.');
+        }
       }
     })
-
-    setTimeout(() => {
-      this.isLoading.set(false);
-    }, 1000);
   }
 }
