@@ -20,10 +20,16 @@ export class MenuLateral implements OnInit{
   ngOnInit(): void {
     const idUsuario = this.loginService.getIdUsuarioLogado();
 
+    const perfilEmCache = sessionStorage.getItem('USER_PROFILE');
+    if (perfilEmCache) {
+      this.isProfissional = perfilEmCache === 'Profissional';
+    }
+
     if (idUsuario) {
       this.usuarioService.buscarUsuarioPorId(idUsuario).subscribe({
         next: (dadosRetornados) => {
           this.isProfissional = dadosRetornados.profile === 'Profissional';
+          sessionStorage.setItem('USER_PROFILE', dadosRetornados.profile);
         },
         error: (erro) => {
           console.error("Falha ao buscar os usuários: ", erro);

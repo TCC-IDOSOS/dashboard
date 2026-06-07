@@ -170,6 +170,7 @@ export default class ProfileComponent implements OnInit {
   logout(): void {
     this.loginService.removerToken();
     sessionStorage.removeItem('ID_USUARIO');
+    sessionStorage.removeItem('USER_PROFILE');
     this.router.navigate(['/login']);
   }
 
