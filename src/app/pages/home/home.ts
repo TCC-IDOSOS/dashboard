@@ -19,9 +19,9 @@ export default class HomeComponent implements OnInit {
   totalPacientes = signal(0);
   testesNoPeriodo = signal(0);
   classificacao = signal({
-    acima: 40,
-    media: 35,
-    abaixo: 25
+    acima: 0,
+    media: 0,
+    abaixo: 0
   });
 
   totalPorTipo = signal([

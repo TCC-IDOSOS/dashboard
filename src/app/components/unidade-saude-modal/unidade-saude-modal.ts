@@ -126,4 +126,53 @@ export class UnidadeSaudeModalComponent implements OnInit {
       this.unidadeForm.markAllAsTouched();
     }
   }
+
+  aplicarMascaraCep(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let valor = input.value.replace(/\D/g, ''); 
+
+    if (valor.length > 8) {
+      valor = valor.substring(0, 8);
+    }
+
+    if (valor.length > 5) {
+      valor = valor.replace(/(\d{5})(\d{1,3})/, '$1-$2');
+    }
+
+    input.value = valor;
+    this.unidadeForm.get('zipCode')?.setValue(valor, { emitEvent: false });
+  }
+
+  aplicarMascaraCnpj(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let valor = input.value.replace(/\D/g, '');
+
+    if (valor.length > 14) valor = valor.substring(0, 14);
+
+    if (valor.length > 12) {
+      valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})/, '$1.$2.$3/$4-$5');
+    } else if (valor.length > 8) {
+      valor = valor.replace(/(\d{2})(\d{3})(\d{3})(\d{1,4})/, '$1.$2.$3/$4');
+    } else if (valor.length > 5) {
+      valor = valor.replace(/(\d{2})(\d{3})(\d{1,3})/, '$1.$2.$3');
+    } else if (valor.length > 2) {
+      valor = valor.replace(/(\d{2})(\d{1,3})/, '$1.$2');
+    }
+
+    input.value = valor;
+    this.unidadeForm.get('cnpj')?.setValue(valor, { emitEvent: false });
+  }
+
+  aplicarMascaraTelefone(event: Event) {
+    const input = event.target as HTMLInputElement;
+    let valor = input.value.replace(/\D/g, '');
+
+    if (valor.length > 11) valor = valor.substring(0, 11);
+    
+    valor = valor.replace(/^(\d{2})(\d)/g, '($1) $2');
+    valor = valor.replace(/(\d)(\d{4})$/, '$1-$2');
+
+    input.value = valor;
+    this.unidadeForm.get('phone')?.setValue(valor, { emitEvent: false });
+  }
 }

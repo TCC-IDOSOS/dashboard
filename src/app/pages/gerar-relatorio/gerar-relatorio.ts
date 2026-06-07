@@ -5,6 +5,8 @@ import { MenuLateral } from '../../components/menu-lateral/menu-lateral';
 import { UsuariosService } from '../../services/usuarios/usuarios';
 import { TestesService } from '../../services/testes/testesService';
 import { UnidadeSaudeService } from '../../services/unidade-saude/unidade-saude-service';
+import { LoginService } from '../../services/login/login';
+import { Router } from '@angular/router';
 import { UnidadeSaude } from '../../shared/interfaces/unidade-saude.interface';
 
 @Component({
@@ -17,6 +19,8 @@ export default class GerarRelatorio implements OnInit {
   private usuarioService = inject(UsuariosService);
   private testesService = inject(TestesService);
   private unidadeSaudeService = inject(UnidadeSaudeService);
+  private loginService = inject(LoginService);
+  private router = inject(Router);
 
   dataInicial = signal('');
   dataFinal = signal('');
@@ -39,6 +43,18 @@ export default class GerarRelatorio implements OnInit {
   });
 
   ngOnInit(): void {
+    const idUsuario = this.loginService.getIdUsuarioLogado();
+    if (idUsuario) {
+      this.usuarioService.buscarUsuarioPorId(idUsuario).subscribe({
+        next: (dados) => {
+          if (dados.profile !== 'Profissional') {
+            this.router.navigate(['/testes']);
+            return;
+          }
+        }
+      });
+    }
+
     this.unidadeSaudeService.listarUnidadesSaude().subscribe({
       next: (unidades) => {
         this.unidadesList.set(unidades);

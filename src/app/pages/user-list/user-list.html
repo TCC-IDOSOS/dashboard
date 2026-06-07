@@ -39,11 +39,11 @@
               <td class="py-4 px-6">
                 <div class="font-medium text-gray-900">{{ u.name }}</div>
               </td>
-              <td class="py-4 px-6 text-gray-700">{{ u.cpf }}</td>
+              <td class="py-4 px-6 text-gray-700">{{ formatarCpf(u.cpf) }}</td>
               <td class="py-4 px-6">
                 <span class="px-2.5 py-1 text-xs font-medium rounded-full"
-                  [ngClass]="{'bg-blue-50 text-blue-700': u.profile === 'Paciente', 'bg-green-50 text-green-700': u.profile === 'Profissional'}">
-                  {{ u.profile }}
+                  [ngClass]="{'bg-blue-50 text-blue-700': u.profile === 'Paciente', 'bg-green-50 text-green-700': u.profile === 'Profissional', 'bg-purple-50 text-purple-700': $any(u.profile) === 'Admin' || $any(u.profile) === 'admin'}">
+                  {{ ($any(u.profile) === 'Admin' || $any(u.profile) === 'admin') ? 'Pesquisador' : u.profile }}
                 </span>
               </td>
               <td class="py-4 px-6 text-gray-600">{{ u.email }}</td>
