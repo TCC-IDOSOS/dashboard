@@ -33,7 +33,7 @@ export class UserModalComponent implements OnInit {
   
   unidadesSaude: string[]= [];
   unidadesSaudeList: any[] = [];
-  tiposUsuario = ['Paciente', 'Profissional', "Admin"];
+  tiposUsuario = ['Paciente', 'Profissional', 'Pesquisador'];
   genres = [Genero.MASCULINO, Genero.FEMININO, Genero.PREFIRO_NAO_INFORMAR, Genero.OUTRO]
   usuarioSalvo = output<void>();
 
@@ -70,7 +70,7 @@ export class UserModalComponent implements OnInit {
         state: user.address?.state,
         complement: user.address?.complement,
         genre: user.genre,
-        profile: user.profile,
+        profile: (user.profile as string === 'Admin' || user.profile as string === 'admin') ? 'Pesquisador' : user.profile,
         phone: user.phone,
         password: user.password,
         unidadeSaude: user.healthUnit?.name
@@ -141,7 +141,7 @@ export class UserModalComponent implements OnInit {
       },
       id: this.criarEditarUsuario() ===  Operacao.EDITAR ? this.usuario()!.id : this.userService.idUsuario,
       genre: userData.genre,
-      profile: userData.profile,
+      profile: userData.profile === 'Pesquisador' ? 'Admin' : userData.profile,
       phone: userData.phone,
       ativo: "sim",
       password: userData.password,
