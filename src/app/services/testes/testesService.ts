@@ -26,9 +26,35 @@ export class TestesService {
     if (email) {
       params = params.set('email', email);
     }
-    
+
     return this.http.get<TesteListagem[]>(`${this.apiUrl}/users/tests`, { params });
   }
 
+  gerarRelatorioResultados(filtros: {
+    startDate: string;
+    endDate: string;
+    patientName?: string;
+    healthUnitId?: number;
+    patientAge?: number;
+  }): Observable<Blob> {
+    let params = new HttpParams()
+      .set('startDate', filtros.startDate)
+      .set('endDate', filtros.endDate);
+
+    if (filtros.patientName) {
+      params = params.set('patientName', filtros.patientName);
+    }
+    if (filtros.healthUnitId != null) {
+      params = params.set('healthUnitId', String(filtros.healthUnitId));
+    }
+    if (filtros.patientAge != null) {
+      params = params.set('patientAge', String(filtros.patientAge));
+    }
+
+    return this.http.get(`${this.apiUrl}/reports/test-results`, {
+      params,
+      responseType: 'blob'
+    });
+  }
 
 }
