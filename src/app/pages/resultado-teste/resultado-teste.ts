@@ -13,6 +13,7 @@ export class ResultadoTesteComponent {
   dados = signal<any>(null);
   maxRef = signal<number>(100);
   maiorValor = signal<number>(100);
+  dataHoje = new Date();
 
   abrir(dadosRecebidos: any) {
     this.dados.set(dadosRecebidos);
