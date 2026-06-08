@@ -89,14 +89,31 @@ export default class HomeComponent implements OnInit {
         
         const requisicoes = pacientes.map(p => 
           this.testesService.buscarListaTestesUsuario(p.id, p.email).pipe(
-            map(testes => ({
-              nome: p.name,
-              cpf: p.cpf,
-              unidadeSaude: p.healthUnit?.name || 'Não informada',
-              quantidadeTestes: testes ? testes.length : 0,
-              datasTestes: testes ? testes.map((t: any) => t.createdAt || t.testDateTime || t.dataHora) : [],
-              listaTestes: (testes || []).map((t: any) => ({ ...t, unidadeSaude: p.healthUnit?.name || 'Não informada' }))
-            })),
+            switchMap(testes => {
+              if (!testes || testes.length === 0) {
+                return of({ nome: p.name, cpf: p.cpf, unidadeSaude: p.healthUnit?.name || 'Não informada', quantidadeTestes: 0, datasTestes: [], listaTestes: [] });
+              }
+
+              const reqDetalhes = testes.map((t: any) => 
+                this.testesService.buscarTesteUsuario(p.email, t.id).pipe(
+                  map(detalhe => {
+                    const pTimes = typeof detalhe?.peaks_t_s === 'string' ? JSON.parse(detalhe.peaks_t_s || '[]') : (detalhe?.peaks_t_s || []);
+                    return {
+                      ...t,
+                      unidadeSaude: p.healthUnit?.name || 'Não informada',
+                      repeticoes: detalhe?.repeticoes_completas ?? detalhe?.n_peaks ?? pTimes.length
+                    };
+                  }),
+                  catchError(() => of({ ...t, unidadeSaude: p.healthUnit?.name || 'Não informada', repeticoes: 0 }))
+                )
+              );
+
+              return forkJoin(reqDetalhes).pipe(
+                map(testesComDetalhes => ({
+                  nome: p.name, cpf: p.cpf, unidadeSaude: p.healthUnit?.name || 'Não informada', quantidadeTestes: testesComDetalhes.length, datasTestes: testesComDetalhes.map((t: any) => t.createdAt || t.testDateTime || t.dataHora), listaTestes: testesComDetalhes
+                }))
+              );
+            }),
             catchError(() => of({ nome: p.name, cpf: p.cpf, unidadeSaude: p.healthUnit?.name || 'Não informada', quantidadeTestes: 0, datasTestes: [], listaTestes: [] }))
           )
         );
@@ -239,7 +256,7 @@ export default class HomeComponent implements OnInit {
     let somaMarcha = 0, countMarcha = 0;
 
     testes.forEach((t: any) => {
-      const reps = t.totalRepetitionsApp || 0;
+      const reps = t.repeticoes || 0;
       if (t.testType === 'UTT') {
         somaUtt += reps;
         countUtt++;
@@ -257,7 +274,7 @@ export default class HomeComponent implements OnInit {
     testes.forEach((t: any) => {
       if (filtro !== 'Todos' && t.testType !== filtro) return;
 
-      const reps = t.totalRepetitionsApp || 0;
+      const reps = t.repeticoes || 0;
       const mediaReferencia = t.testType === 'UTT' ? mediaUtt : (t.testType === 'MARCHA' ? mediaMarcha : 0);
 
       if (mediaReferencia === 0) return;
