@@ -37,8 +37,7 @@
         <section>
           <h3 class="text-blue-900 font-black text-xs uppercase tracking-widest mb-4">Dados do Teste</h3>
           <div class="space-y-2 text-sm">
-            <p><span class="font-bold text-gray-900 w-24 inline-block">Data/Hora:</span> {{ dados()?.dataHora | date:'dd/MM/yyyy HH:mm' }}</p>
-            <p><span class="font-bold text-gray-900 w-24 inline-block">Avaliador:</span> {{ dados()?.profissional }}</p>
+            <p><span class="font-bold text-gray-900 w-24 inline-block">Data/Hora:</span> {{ dados()?.dataHora | date:'dd/MM/yyyy' }}</p>
             <p><span class="font-bold text-gray-900 w-24 inline-block">Unidade:</span> {{ dados()?.unidade }}</p>
           </div>
         </section>
